@@ -40,7 +40,7 @@ TEST_CASE("testing the factorial function") {
     CHECK(factorial(10) == 3628800);
 }
 ```
-As you can see, defining a test case is just a matter of including the header file and some Macros. I highly recommend having a look at [the docs](https://github.com/doctest/doctest/tree/master/doc/markdown). It's not necessary to read everything but looking at the [tutorial](https://github.com/doctest/doctest/blob/master/doc/markdown/tutorial.md) and the [types of assertions](https://github.com/doctest/doctest/blob/master/doc/markdown/assertions.md) available are a good starting point.
+As you can see, defining a test case is just a matter of including the header file and some Macros. I highly recommend having a look at [the docs](https://github.com/doctest/doctest/tree/master/doc/markdown). It's not necessary to read everything but looking at the [tutorial](https://github.com/doctest/doctest/blob/master/doc/markdown/tutorial.md) and the [types of assertions](https://github.com/doctest/doctest/blob/master/doc/markdown/assertions.md) available, are a good starting point.
 
 ## Collabroative Working
 The following is a suggestion on what a possible workflow could look like. It's important to give feedback, so that we can adjust our workflow according to our needs. It's important to understand concepts related to git and GitHub like commits, push/pull, branches, merges and pull requests for the following.
@@ -93,3 +93,6 @@ git pull origin main
 
 ### Github Actions
 With GitHub Actions we can automatically create a test envoirment that runs our code and most importantly runs the tests we defined. Creating a pull request is an event that triggers a workflow, which sets up a linux machine, then compiles and runs our tests. Furthermore we can verify that the pull request won't cause any merge conflict. This is necessary information to approve a pull request that is merged into the main branch because <b>we want to ensure that the main branch is always working correctly</b>. Don't worry about setting that up, you don't have to. 
+
+### Organize taks
+We need some tool that helps us keep track which tasks are due and who is working on what. We could use somthing like [Trello](https://trello.com/de) or [Notion](https://www.notion.so)
