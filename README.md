@@ -67,8 +67,9 @@ TEST_CASE("testing the sumUpTo function") {
 ```
 4. Run all tests (could look similar to this)
 ```shell
-make tests
-./test
+make test #compiles tests (as specified in Makefile)
+build/main #optional: run application (located in folder build)
+build/test #runs test file in folder build
 ```
 4. Commit and Push
 ```shell

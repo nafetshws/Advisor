@@ -1,0 +1,16 @@
+name: GitHub Actions - Testing
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: compile test
+        run: make test
+      - name: run test
+        run: make run_tests
