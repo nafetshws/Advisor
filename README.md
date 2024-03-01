@@ -96,3 +96,6 @@ With GitHub Actions we can automatically create a test envoirment that runs our 
 
 ### Organize taks
 We need some tool that helps us keep track which tasks are due and who is working on what. We could use somthing like [Trello](https://trello.com/de) or [Notion](https://www.notion.so)
+
+### Consistency
+Consistency is very important to keep things simple. Language is one aspect to consider. I would suggest that we use englisch because everyone understands it and otherwise we would probably end up with a mixture of german and english which just creates unnecessary complexity. Furthermore it might be wise to use a [Linter](https://www.testautomatisierung.org/lexikon/linting/) and/or a code formatter to achieve a more readable and consistent code style.  
