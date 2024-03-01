@@ -9,3 +9,10 @@ TEST_CASE("testing factorial") {
 	CHECK(factorial(3) == 6);
 	CHECK(factorial(4) == 24);
 }
+
+TEST_CASE("testing the sumUpTo function") {
+    CHECK(sumUpTo(1) == 1);
+    CHECK(sumUpTo(2) == 3);
+    CHECK(sumUpTo(3) == 6);
+    CHECK(sumUpTo(-10) == 1);
+}
