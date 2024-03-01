@@ -96,6 +96,8 @@ git pull origin main
 ```
 11. Repeat
 
+I have already used the steps above to create a pull request, which you can check out under "Pull requests" (located in the top bar). You can also have a look at the tests that were automatically executed. Just click on "Show all checks" > "Details" > "run test". Notice that the pull request isn't merged yet as it hasn't been reviewed by a peer.
+
 ### Github Actions
 With GitHub Actions we can automatically create a test environment that runs our code and most importantly runs the tests we defined. Creating a pull request is an event that triggers a workflow, which sets up a linux machine, then compiles and runs our tests. Furthermore we can verify that the pull request won't cause any merge conflict. This is necessary information to approve a pull request that is merged into the main branch because <b>we want to ensure that the main branch is always working correctly</b>. Don't worry about setting that up, you don't have to. 
 
