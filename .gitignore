@@ -1,0 +1,4 @@
+*.un*
+*.swp*
+build/
+.vscode/
