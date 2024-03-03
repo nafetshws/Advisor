@@ -1,4 +1,4 @@
-FILES = src/misc.cpp #append your new cpp file
+FILES = src/misc.cpp src/mms/mms.cpp #append your new cpp file
 TEST_FILES = test/test.cpp
 
 OUT = build/main
@@ -7,11 +7,13 @@ TEST_OUT = build/test
 CC_FLAGS = -std=c++17 -Wall -O3
 BUILD_DIR = ./build
 
+DEBUG = 1 #
+
 .PHONY: all, clean, run_tests, main, test
 
 all: #compiles everything
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) 
+	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS)  
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS)
 
 main: #only compiles the application
