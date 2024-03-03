@@ -7,22 +7,22 @@ TEST_OUT = build/test
 CC_FLAGS = -std=c++17 -Wall -O3
 BUILD_DIR = ./build
 
-DEBUG = 1 #
+DEBUG = 1 #DEBUG MODE (1/0) - important for LOG
 
-.PHONY: all, clean, run_tests, main, test
+.PHONY: all, clean, run_tests, main, test, build_directory
 
-all: #compiles everything
+all: clean #compiles everything
+	$(MAKE) main
+	$(MAKE) test
+
+main: build_directory #only compiles the application
+	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+
+test: build_directory #only compiles the tests
+	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+
+build_directory:
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS)  
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS)
-
-main: #only compiles the application
-	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) 
-
-test: #only compiles the tests
-	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS)
 
 run_tests:
 	$(TEST_OUT)
