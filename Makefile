@@ -1,4 +1,4 @@
-FILES = src/misc.cpp src/mms/mms.cpp #append your new cpp file
+FILES = src/misc.cpp src/mms/mms.cpp src/floodfill.cpp #append your new cpp file
 TEST_FILES = test/test.cpp
 
 OUT = build/main
