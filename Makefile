@@ -1,4 +1,4 @@
-FILES = src/misc.cpp #append your new cpp file
+FILES = src/misc.cpp src/mms/mms.cpp #append your new cpp file
 TEST_FILES = test/test.cpp
 
 OUT = build/main
@@ -7,20 +7,22 @@ TEST_OUT = build/test
 CC_FLAGS = -std=c++17 -Wall -O3
 BUILD_DIR = ./build
 
-.PHONY: all, clean, run_tests, main, test
+DEBUG = 1 #DEBUG MODE (1/0) - important for LOG
 
-all: #compiles everything
-	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) 
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS)
+.PHONY: all, clean, run_tests, main, test, build_directory
 
-main: #only compiles the application
-	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) 
+all: clean #compiles everything
+	$(MAKE) main
+	$(MAKE) test
 
-test: #only compiles the tests
+main: build_directory #only compiles the application
+	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+
+test: build_directory #only compiles the tests
+	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+
+build_directory:
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS)
 
 run_tests:
 	$(TEST_OUT)
