@@ -11,4 +11,7 @@ int main() {
             MMS::setText(x, y, std::to_string(maze[y][x].distance));
         }
     }
+    //floodfill(maze[0][0]);
+    //updateWalls(maze[0][0], 0);
+    std::cout << center1->x << std::endl;
 }

@@ -13,6 +13,8 @@
  * In this case the cell is surrounded by walls except for the north side 
 */
 static const int SIZE = 16;
+static const int MAX_PATH_LENGTH = SIZE * SIZE;
+static const char DIRECTIONS[4] = {'n', 'e', 's', 'w'};
 
 struct Cell {
     uint8_t x;
@@ -32,6 +34,8 @@ struct Cell {
     void setEastWall();
     void setSoutWall();
     void setWestWall();
+
+    void setWall(char direction);
 };
 
 extern Cell maze[SIZE][SIZE];
@@ -45,6 +49,10 @@ extern Cell *center4;
 
 uint8_t calculateManhattanDistance(const Cell& cell1, const Cell& cell2);
 void initMaze();
+void floodfill(Cell& c);
+void floodfillHelper(Cell& c, int direction);
+bool isOpenNeighbor(Cell& c, Cell& neighbor);
+void updateWalls(Cell& cell, int direction);
 
 
 #endif
