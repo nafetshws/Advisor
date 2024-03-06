@@ -5,13 +5,12 @@
 #include "../include/floodfill.hpp"
 
 int main() {
-    initMaze();
+    Maze::initMaze();
+
     for(int y = 0; y < SIZE; y++) {
         for(int x = 0; x < SIZE; x++) {
-            MMS::setText(x, y, std::to_string(maze[y][x].distance));
+            MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
         }
     }
-    //floodfill(maze[0][0]);
-    //updateWalls(maze[0][0], 0);
-    std::cout << center1->x << std::endl;
+    floodfill(*Maze::startCell);
 }

@@ -19,7 +19,7 @@ main: build_directory #only compiles the application
 	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
 
 test: build_directory #only compiles the tests
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
 
 build_directory:
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)

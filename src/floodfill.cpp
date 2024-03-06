@@ -6,59 +6,66 @@
 #include "../include/floodfill.hpp"
 #include "../include/mms.hpp"
 
-//necessary for linker - global variables
-Cell maze[SIZE][SIZE];
-Cell *center1;
-Cell *center2;
-Cell *center3;
-Cell *center4;
+//static variables
+Cell Maze::maze[SIZE][SIZE]; 
+Cell* Maze::center1;
+Cell* Maze::center2;
+Cell* Maze::center3;
+Cell* Maze::center4;
+Cell* Maze::startCell;
 
-void initMaze() {
+void Maze::initMaze() {
     //init x and y values
     for(int y = 0; y < SIZE; y++) {
         for(int x = 0; x < SIZE; x++) {
-            maze[y][x].x = x;
-            maze[y][x].y = y;
+            Maze::get(x, y)->x = x;
+            Maze::get(x, y)->y = y;
 
             //set walls that surround the maze
             if(y == 0) {
-                maze[y][x].setSoutWall(); 
+                Maze::get(x, y)->setSoutWall();
                 MMS::setWall(x, y, 's');
             } 
             if(y == SIZE-1) {
-                maze[y][x].setNorthWall();  
+                Maze::get(x, y)->setNorthWall(); 
                 MMS::setWall(x, y, 'n');
             }
             if(x == 0) {
-                maze[y][x].setWestWall();
+                Maze::get(x, y)->setWestWall(); 
                 MMS::setWall(x, y, 'w');
             } 
             if(x == SIZE-1) {
-                maze[y][x].setEastWall();
+                Maze::get(x, y)->setEastWall(); 
                 MMS::setWall(x, y, 'e');
             }
         }
     }
 
     //init global center cells
-    center1 = &maze[8][8];
-    center2 = &maze[8][7];
-    center3 = &maze[7][7];
-    center4 = &maze[7][8];
+    Maze::center1 = Maze::get(8, 8);
+    Maze::center2 = Maze::get(7, 8);
+    Maze::center3 = Maze::get(7, 7);
+    Maze::center4 = Maze::get(8, 7);
 
     //calculate Manhattan distance of each cell
     for(int y = 0; y < SIZE; y++) {
         for(int x = 0; x < SIZE; x++) {
             std::vector<uint8_t> md = {
-                calculateManhattanDistance(maze[y][x], *center1),
-                calculateManhattanDistance(maze[y][x], *center2),
-                calculateManhattanDistance(maze[y][x], *center3),
-                calculateManhattanDistance(maze[y][x], *center4),
+                calculateManhattanDistance(*Maze::get(x, y), *center1),
+                calculateManhattanDistance(*Maze::get(x, y), *center2),
+                calculateManhattanDistance(*Maze::get(x, y), *center3),
+                calculateManhattanDistance(*Maze::get(x, y), *center4),
             };
             //choose lowest md
-            maze[y][x].distance = *(std::min_element(md.begin(), md.end()));
+            Maze::get(x, y)->distance = *(std::min_element(md.begin(), md.end()));
         }
     }
+    //set start cell
+    Maze::startCell = Maze::get(0, 0);
+}
+
+Cell* Maze::get(uint8_t x, uint8_t y) {
+    return &Maze::maze[y][x];
 }
 
 void floodfill(Cell& c) {
@@ -70,7 +77,6 @@ void floodfillHelper(Cell& c, int direction) {
     if(c.distance == 0) return;
 
     //update walls
-    //LOG("Direction: " + std::string(1, DIRECTIONS[direction]));
     updateWalls(c, direction);
 
     std::stack<Cell*> stack;
@@ -80,32 +86,37 @@ void floodfillHelper(Cell& c, int direction) {
 
     while(!stack.empty()) {
         //pop elememt from stack
-        Cell current = *(stack.top());
+        Cell *current = stack.top();
         stack.pop();
 
         std::vector<Cell*> neighbors;
-        if(current.y < SIZE - 1) neighbors.push_back(&maze[current.y+1][current.x]); // add north neighbor
-        if(current.x < SIZE - 1) neighbors.push_back(&maze[current.y][current.x+1]); // add east neighbor
-        if(current.y > 0) neighbors.push_back(&maze[current.y-1][current.x]);        // add south neighbor
-        if(current.x > 0) neighbors.push_back(&maze[current.y][current.x-1]);        // add west neighbor
+
+        if(current->y < SIZE - 1) neighbors.push_back(Maze::get(current->x, current->y + 1)); // add north neighbor
+        if(current->x < SIZE - 1) neighbors.push_back(Maze::get(current->x + 1, current->y)); // add east neighbor
+        if(current->y > 0) neighbors.push_back(Maze::get(current->x, current->y - 1));        // add south neighbor
+        if(current->x > 0) neighbors.push_back(Maze::get(current->x - 1, current->y));        // add west neighbor
 
         //find minimum Manhattan distance of open neighbors
         int minMD = MAX_PATH_LENGTH;
-        for(Cell *neighbor: neighbors) {
-            if(!isOpenNeighbor(current, *neighbor)) continue;
+        for(Cell *neighbor : neighbors) {
+            //std::cerr << "Neighbor cell: (" << unsigned(neighbor->x) << ", " << unsigned(neighbor->y) << ")" << std::endl;
+            if(!isOpenNeighbor(*current, *neighbor)) continue;
 
             if(neighbor->distance < minMD) {
                 minMD = neighbor->distance;
-                nextCell = neighbor;
+                //update the next cell only if the neighbors of the current cell, which the robot is in, are searched
+                if(current->x == c.x && current->y == c.y) {
+                    nextCell = neighbor;
+                }
             }
         }
 
-        if(current.distance - 1 != minMD) {
+        if(current->distance - 1 != minMD) {
             //inc distance
-            current.distance = minMD + 1;
+            current->distance = minMD + 1;
 
             //update value of square
-            MMS::setText(current.x, current.y, std::to_string(current.distance)); 
+            MMS::setText(current->x, current->y, std::to_string(current->distance)); 
 
             //push neighbors onto the stack
             for(Cell *neighbor : neighbors) {
@@ -146,41 +157,36 @@ void floodfillHelper(Cell& c, int direction) {
 }
 
 void updateWalls(Cell& cell, int direction) {
-    std::cerr << "Updating cell: (" << cell.x << cell.y << ")" << std::endl;
-    LOG(cell.x + 0);
-
     if(MMS::wallFront()) {
-        LOG("Wall in front");
-        maze[cell.y][cell.x].setWall(DIRECTIONS[direction]);
+        Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[direction]);
     }
 
     if(MMS::wallRight()) {
-        LOG("Wall right");
-        maze[cell.y][cell.x].setWall(DIRECTIONS[(direction + 1) % 4]);
+        Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[(direction + 1) % 4]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction + 1) % 4]);
     }
 
     if(MMS::wallLeft()) {
-        LOG("Wall left");
-        maze[cell.y][cell.x].setWall(DIRECTIONS[(direction - 1) % 4]);
-        MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction - 1) % 4]);
+        int newDirection = mod(direction - 1, 4);
+        Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[newDirection]);
+        MMS::setWall(cell.x, cell.y, DIRECTIONS[newDirection]);
     }
 }
 
 void Cell::setWall(char direction) {
     switch(direction) {
         case 'n':
-            maze[this->y][this->x].setNorthWall();
+            Maze::get(this->x, this->y)->setNorthWall();
             break;
         case 'e':
-            maze[this->y][this->x].setEastWall();
+            Maze::get(this->x, this->y)->setEastWall();
             break;
         case 's':
-            maze[this->y][this->x].setSoutWall();
+            Maze::get(this->x, this->y)->setSoutWall();
             break;
         case 'w':
-            maze[this->y][this->x].setWestWall();
+            Maze::get(this->x, this->y)->setWestWall();
             break;
         default:
             break;
@@ -231,4 +237,13 @@ void Cell::setSoutWall() {
 
 void Cell::setWestWall() {
     this->walls |= 8;
+}
+
+//Necessary because % isn't a real modulo operator but a remainder operator
+int mod(int a, int b) {
+    int res = a % b;
+    if(res < 0) {
+        res += b;
+    }
+    return res;
 }

@@ -5,7 +5,7 @@
 
 //MMS uses stdin/stdout for communication. In order to log text, we need to use cerr
 #if DEBUG == 1
-#define LOG(text) (std::cerr << (text) << std::endl)
+#define LOG(text) (std::cerr << text << std::endl)
 #else
 #define LOG(text) 
 #endif

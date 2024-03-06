@@ -38,21 +38,26 @@ struct Cell {
     void setWall(char direction);
 };
 
-extern Cell maze[SIZE][SIZE];
+struct Maze {
+    static Cell maze[SIZE][SIZE];
 
-//Numbering based on quadrants of a Cartesian coordinate system
-extern Cell *center1;
-extern Cell *center2;
-extern Cell *center3;
-extern Cell *center4;
+    static void initMaze();
+    static Cell* get(uint8_t x, uint8_t y);
 
+    //Numbering based on quadrants of a Cartesian coordinate system
+    static Cell *center1;
+    static Cell *center2;
+    static Cell *center3;
+    static Cell *center4;
+
+    static Cell *startCell;
+};
 
 uint8_t calculateManhattanDistance(const Cell& cell1, const Cell& cell2);
-void initMaze();
 void floodfill(Cell& c);
 void floodfillHelper(Cell& c, int direction);
 bool isOpenNeighbor(Cell& c, Cell& neighbor);
 void updateWalls(Cell& cell, int direction);
-
+int mod(int a, int b);
 
 #endif
