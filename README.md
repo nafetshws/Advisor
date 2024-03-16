@@ -106,3 +106,8 @@ We need some tool that helps us keep track which tasks are due and who is workin
 
 ### Consistency
 Consistency is very important to keep things simple. Language is one aspect to consider. I would suggest that we use englisch because everyone understands it and otherwise we would probably end up with a mixture of german and english which just creates unnecessary complexity. Furthermore it might be wise to use a [Linter](https://www.testautomatisierung.org/lexikon/linting/) and/or a code formatter to achieve a more readable and consistent code style.
+
+## MMS
+To visualize how our robot behaves in a maze, we use the Micromouse simulator mms. You can download it [here](https://github.com/mackorone/mms/releases). The simulator communicates with our program using stdin and stdout. If you want to log something cou can either call the macro LOG, or simply use std::cerr. Once you have opened the application you can add a new algorithm by clicking on the plus symbol, which is located next to the config panel in the top right corner. Select the root folder of this repository as "Directory" and fill out the other input field as shown in the image below.
+![mms setup](mms_setup.png)
+To run our algorithm you have to press "Build" in the Controls panel and once that is finished cou can click on "Run". Furthermore you can adjust the speed, pause and reset the mouse.
