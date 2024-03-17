@@ -21,6 +21,13 @@ main: build_directory #only compiles the application
 test: build_directory #only compiles the tests
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
 
+windows: build_directory_win
+	g++ -o build\main.exe $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+
+.PHONY: build_directory_win
+build_directory_win:
+	@if not exist "build" mkdir build 
+
 build_directory:
 	[ -d $(BUILD_DIR) ] || mkdir -p $(BUILD_DIR)
 
