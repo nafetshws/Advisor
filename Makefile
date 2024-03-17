@@ -9,7 +9,7 @@ BUILD_DIR = ./build
 
 DEBUG = 1 #DEBUG MODE (1/0) - important for LOG
 
-.PHONY: all, clean, run_tests, main, test, build_directory
+.PHONY: all, clean, run_tests, main, test, build_directory, build_directory_win
 
 all: clean #compiles everything
 	$(MAKE) main
@@ -21,10 +21,9 @@ main: build_directory #only compiles the application
 test: build_directory #only compiles the tests
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
 
-windows: build_directory_win
-	g++ -o build\main.exe $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+wmain: build_directory_win
+	cl -o build/main.exe src/main.cpp $(FILES) $(CC_FLAGS) /EHsc
 
-.PHONY: build_directory_win
 build_directory_win:
 	@if not exist "build" mkdir build 
 
@@ -36,3 +35,6 @@ run_tests:
 
 clean:
 	rm -rf build/* 
+
+wclean:
+	rmdir /s /q build
