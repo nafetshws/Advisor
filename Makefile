@@ -22,7 +22,7 @@ test: build_directory #only compiles the tests
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
 
 wmain: build_directory_win
-	cl -o build/main.exe src/main.cpp $(FILES) $(CC_FLAGS) /EHsc
+	g++ -o build\main.exe src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
 
 build_directory_win:
 	@if not exist "build" mkdir build 
