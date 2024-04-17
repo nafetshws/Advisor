@@ -1,18 +1,16 @@
 #include <iostream>
+#include <string>
 #include "../include/misc.hpp"
 #include "../include/mms.hpp"
+#include "../include/floodfill.hpp"
 
 int main() {
-    LOG("Running...");
-    MMS::setColor(0, 0, 'G');
-    MMS::setText(0, 0, "abc");
-    while (true) {
-        if (!MMS::wallLeft()) {
-            MMS::turnLeft();
+    Maze::initMaze();
+
+    for(int y = 0; y < SIZE; y++) {
+        for(int x = 0; x < SIZE; x++) {
+            MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
         }
-        while (MMS::wallFront()) {
-            MMS::turnRight();
-        }
-        MMS::moveForward();
     }
+    floodfill(*Maze::startCell);
 }
