@@ -1,4 +1,4 @@
-FILES = src/misc.cpp src/mms/mms.cpp src/floodfill.cpp #append your new cpp file
+FILES = src/mms/mms.cpp src/algorithms/floodfill.cpp #append your new cpp file
 TEST_FILES = test/test.cpp
 
 OUT = build/main
@@ -16,13 +16,13 @@ all: clean #compiles everything
 	$(MAKE) test
 
 main: build_directory #only compiles the application
-	g++ -o $(OUT) src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+	g++ -o $(OUT) src/algorithms/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
 
 test: build_directory #only compiles the tests
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
 
 wmain: build_directory_win
-	g++ -o build\main.exe src/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+	g++ -o build\main.exe src/algorithms/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
 
 build_directory_win:
 	@if not exist "build" mkdir build 

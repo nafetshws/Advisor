@@ -1,8 +1,7 @@
 #include <iostream>
 #include <string>
-#include "../include/misc.hpp"
-#include "../include/mms.hpp"
-#include "../include/floodfill.hpp"
+#include "../../include/mms.hpp"
+#include "../../include/floodfill.hpp"
 
 int main() {
     Maze::initMaze();
