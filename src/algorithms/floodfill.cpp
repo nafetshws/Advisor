@@ -3,8 +3,8 @@
 #include <cmath>
 #include <stack>
 #include <iostream>
-#include "../include/floodfill.hpp"
-#include "../include/mms.hpp"
+#include "../../include/floodfill.hpp"
+#include "../../include/mms.hpp"
 
 //static variables
 Cell Maze::maze[SIZE][SIZE]; 

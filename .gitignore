@@ -1,5 +1,6 @@
 *.un*
 *.swp*
 build/
-.vscode/
 *.obj
+.vscode/
+.pio/
