@@ -8,6 +8,8 @@
 #define TIMER0_PRESCALAR 80
 // Sets off the intterupt ever 100 ms = 1µs * TIMERO_ALARM_AT
 #define TIMER0_ALARM_AT 100000
+// Specifies how often the interrupt is triggerd in one second
+#define INTERUPTS_PER_SECOND 10
 
 // Timer object for coniguration, static for encoder.cpp use only
 static hw_timer_t *Timer0_Cfg;
