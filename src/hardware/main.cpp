@@ -82,28 +82,8 @@ void setup() {
 
 void loop() {
 
-  // Switch motor A on with Speed 100 (turns onboard led on, same pin motor)
-  motorA.turnForward(100);
-  motorB.turnForward(100);
-  delay(3000);
-
-  // print the rps of motor As
-  Serial.printf("Motor A Umdrehung/sek: %d\n", getDirMotorA());
-  Serial.printf("Motor B Umdrehung/sek: %d\n", getDirMotorB());
-
-    // Switch motor A on with Speed 100 (turns onboard led on, same pin motor)
-  motorA.turnBackward(50);
-  motorB.turnBackward(50);
-  delay(3000);
-
-  // print the rps of motor As
-  Serial.printf("Motor A Umdrehung/sek: %d\n", getDirMotorA());
-  Serial.printf("Motor B Umdrehung/sek: %d\n", getDirMotorB());
-
-  // Stop motor A (turns onboard led of, same pin as motor)
-  motorA.stopMotor();
-  motorB.stopMotor();
-  delay(5000);
-
+  // Read out Tof Sensor data
+  Serial.printf("Distanz von 1,2,3:\t%d\t%d\t%d\n", tofLeft.getDist(), tofLeftFront.getDist(), tofRightFront.getDist());
+  delay(1000);
 
 }
