@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "../../include/motor.hpp"
 #include "../../include/encoder.hpp"
+#include "../../include/tof.hpp"
 
 
 // ESP32 PIN OUT ////////////////////////////////
