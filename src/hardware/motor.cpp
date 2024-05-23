@@ -32,6 +32,8 @@ void Motor::turnForward(uint8_t speed) {
     digitalWrite(pinB, LOW);
     // set speed with pwm pin over pwm channel
     ledcWrite(pwmChannel, speed);
+    // save speed
+    this->speed = speed;
 }
 
 
@@ -42,6 +44,13 @@ void Motor::turnBackward(uint8_t speed) {
     digitalWrite(pinB, HIGH);
     // set speed with pwm pin over pwm channel
     ledcWrite(pwmChannel, speed);
+    // save speed
+    this->speed = speed;
+}
+
+
+uint8_t Motor::getSpeed() {
+    return this->speed;
 }
 
 
@@ -51,4 +60,6 @@ void Motor::stopMotor() {
     digitalWrite(pinB, LOW);
     // set speed to 0
     ledcWrite(pwmChannel, 0);
+    // save speed
+    this->speed = 0;
 }

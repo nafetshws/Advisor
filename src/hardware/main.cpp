@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "../../include/motor.hpp"
+#include "../../include/encoder.hpp"
 
 
 // ESP32 PIN OUT ////////////////////////////////
@@ -8,10 +9,16 @@
 #define MOTORA_IN1  0
 #define MOTORA_IN2  2
 #define MOTORA_PWM  15
+#define MOTORA_ENCODER1 36
+#define MOTORA_ENCODER2 39
 // PINS MOTOR B
 #define MOTORB_IN1  4
 #define MOTORB_IN2  16
 #define MOTORB_PWM  17
+#define MOTORB_ENCODER1 35
+#define MOTORB_ENCODER2 34
+
+int speed = 255;
 
 
 // Global Motor Objects
@@ -34,6 +41,9 @@ void setup() {
   // Initialise the motor objects, start pwm channels, confiure pins
   motorA.initialise();
   motorB.initialise();
+  // Initialise the motor encoders pins and interrupts, init timer interrupt
+  initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
+
   Serial.println("SETUP: Motor initialised");
 
   // SETUP END //////////////////////////////////
@@ -43,10 +53,28 @@ void setup() {
 
 void loop() {
 
-  // Switch motor A repeatly on and off (Onboard LED should also blink, uses same pin)
-  motorA.turnBackward(100);
-  delay(5000);
+  // Switch motor A on with Speed 100 (turns onboard led on, same pin motor)
+  motorA.turnForward(100);
+  motorB.turnForward(100);
+  delay(3000);
+
+  // print the rps of motor As
+  Serial.printf("Motor A Umdrehung/sek: %d\n", getDirMotorA());
+  Serial.printf("Motor B Umdrehung/sek: %d\n", getDirMotorB());
+
+    // Switch motor A on with Speed 100 (turns onboard led on, same pin motor)
+  motorA.turnBackward(50);
+  motorB.turnBackward(50);
+  delay(3000);
+
+  // print the rps of motor As
+  Serial.printf("Motor A Umdrehung/sek: %d\n", getDirMotorA());
+  Serial.printf("Motor B Umdrehung/sek: %d\n", getDirMotorB());
+
+  // Stop motor A (turns onboard led of, same pin as motor)
   motorA.stopMotor();
+  motorB.stopMotor();
   delay(5000);
+
 
 }

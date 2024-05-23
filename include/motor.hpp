@@ -45,6 +45,11 @@ public:
     */
     void turnBackward(uint8_t speed);
 
+    /**
+     * @brief   Returns currents set speed of motor
+    */
+    uint8_t getSpeed();
+
 
     /**
      * @brief   Stops the motor immediatly
@@ -59,6 +64,8 @@ private:
     uint8_t pinPWM;         // Pin enable/speed control
 
     uint8_t pwmChannel;     // Internal PWM channel
+
+    uint8_t speed = 0;      // Speed of motor
 };
 
 #endif
