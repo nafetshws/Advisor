@@ -2,7 +2,7 @@
 #include "../../include/motor.hpp"
 #include "../../include/encoder.hpp"
 #include "../../include/tof.hpp"
-
+#include "../../include/ir.hpp"
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -40,8 +40,8 @@ TOF tofRight =        TOF(4, TOF_START_ADDR + 3, TOF4_SHT_PIN);
 TOF tofLeft45 =       TOF(5, TOF_START_ADDR + 4, TOF5_SHT_PIN);
 TOF tofRight45 =      TOF(6, TOF_START_ADDR + 5, TOF6_SHT_PIN);
 
-
-
+// IR Sensor objects
+IR leftIR = IR (TOF1_SHT_PIN);
 
 
 void setup() {
@@ -71,7 +71,7 @@ void setup() {
   Serial.println("SETUP: Try to connect to TOF sensors...");
 
   // init all the tof sensors
-  initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight, tofLeft45, tofRight45);
+  // initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight, tofLeft45, tofRight45);
 
   Serial.println("SETUP: TOF Sensors initialised");
 
@@ -83,7 +83,9 @@ void setup() {
 void loop() {
 
   // Read out Tof Sensor data
-  Serial.printf("Distanz von 1,2,3:\t%d\t%d\t%d\n", tofLeft.getDist(), tofLeftFront.getDist(), tofRightFront.getDist());
-  delay(1000);
+  // Serial.printf("Distanz von 1,2,3:\t%d\t%d\t%d\n", tofLeft.getDist(), tofLeftFront.getDist(), tofRightFront.getDist());
+  bool isTriggered = leftIR.isTriggered();
+  Serial.printf("IR sensor detecting: %d\n", isTriggered);
+  delay(10);
 
 }
