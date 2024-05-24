@@ -41,6 +41,56 @@ TOF tofLeft45 =       TOF(5, TOF_START_ADDR + 4, TOF5_SHT_PIN);
 TOF tofRight45 =      TOF(6, TOF_START_ADDR + 5, TOF6_SHT_PIN);
 
 
+void move_forward(double distance = 1) { 
+
+  uint16_t current = (tofRightFront.getDist() + tofLeftFront.getDist())/2; 
+  motorA.turnForward(50); 
+  motorB.turnForward(50);  
+
+  while(current - tofRight.getDist() < 16*distance) {}
+
+  motorA.stopMotor();
+  motorB.stopMotor(); 
+
+}
+
+uint32_t prev_angle, current_angle;
+
+void turn_right() {
+  read_encoders();
+  current_angle = Encoders[2];
+  prev_angle = current_angle;
+  uint32_t angle_turned = 0;
+    motorA.turnForward(50);
+    motorB.turnBackward(50);
+  while(angle_turned%360 < 90) {
+    read_encoders();
+    current_angle = Encoders[2];
+    angle_turned = current_angle - prev_angle;
+  }
+  motorA.stopMotor();
+  motorB.stopMotor(); 
+}
+
+void turn_left() {
+  read_encoders();
+  current_angle = Encoders[2];
+  prev_angle = current_angle;
+  uint32_t angle_turned = 0;
+  motorB.turnForward(50); // Tune
+  motorA.turnBackward(50);
+  while(angle_turned%360 < 90) {
+    read_encoders();
+    current_angle = Encoders[2];
+    angle_turned = current_angle - prev_angle;
+  }
+  motorA.stopMotor();
+  motorB.stopMotor(); 
+}
+
+
+
+
 
 
 
