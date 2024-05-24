@@ -51,7 +51,7 @@ public:
 
   boolean begin(uint8_t i2c_addr = VL53L0X_I2C_ADDR, boolean debug = false,
                 TwoWire *i2c = &Wire,
-                VL53L0X_Sense_config_t vl_config = VL53L0X_SENSE_HIGH_ACCURACY);
+                VL53L0X_Sense_config_t vl_config = VL53L0X_SENSE_HIGH_SPEED);
   boolean setAddress(uint8_t newAddr);
 
   // uint8_t getAddress(void); // not currently implemented
