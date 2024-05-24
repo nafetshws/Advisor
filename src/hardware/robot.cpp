@@ -13,7 +13,7 @@ bool Robot::wallLeft() {
     return false;
 }
 
-void Robot::moveForward(int distance = 1) {
+void Robot::moveForward(int distance) {
 
 }
 

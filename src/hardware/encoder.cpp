@@ -3,12 +3,12 @@
 
 void Timer0_ISR() {
     // isr is called every 100 milli seconds
-    // calc the revolutions per second
+    // calc the revolutions per second of the wheel
     //
     //  rps = revolution_per_100ms * 1s / 100ms
     //
-    rpsA = MOTA_ROT_COUNT * INTERUPTS_PER_SECOND;
-    rpsB = MOTB_ROT_COUNT * INTERUPTS_PER_SECOND;
+    rpsA = (MOTA_ROT_COUNT / 3) * INTERUPTS_PER_SECOND;
+    rpsB = (MOTB_ROT_COUNT / 3) * INTERUPTS_PER_SECOND;
 
     // set the counters to 0 for next calculation
     MOTA_ROT_COUNT = 0;
