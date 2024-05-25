@@ -76,6 +76,6 @@ public:
  * @param   tof5 reference tof sensor 5
  * @param   tof6 reference tof sensor 6
 */
-void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4, TOF &tof5, TOF &tof6);
+void initTofSensors(TOF &tof1, TOF &tof2);
 
 #endif

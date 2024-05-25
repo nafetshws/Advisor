@@ -47,33 +47,21 @@ uint16_t TOF::getDist(bool useStoredDist) {
 }
 
 
-void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4, TOF &tof5, TOF &tof6) {
+void initTofSensors(TOF &tof1, TOF &tof2) {
 
   // reset all sensor
   tof1.enable(false);
   tof2.enable(false);
-  tof3.enable(false);
-  tof4.enable(false);
-  tof5.enable(false);
-  tof6.enable(false);
   delay(10);
 
   // unreset all sensors
   tof1.enable(true);
   tof2.enable(true);
-  tof3.enable(true);
-  tof4.enable(true);
-  tof5.enable(true);
-  tof6.enable(true);
   delay(10);
 
   // reset all sensors again
   tof1.enable(false);
   tof2.enable(false);
-  tof3.enable(false);
-  tof4.enable(false);
-  tof5.enable(false);
-  tof6.enable(false);
   delay(10);
   
   // only enable one at a time to set the address
@@ -86,26 +74,6 @@ void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4, TOF &tof5, TOF &
   // tof 2
   tof2.enable(true);
   tof2.begin();
-  delay(10);
-
-  // tof 3
-  tof3.enable(true);
-  tof3.begin();
-  delay(10);
-
-  // tof 4
-  tof4.enable(true);
-  tof4.begin();
-  delay(10);
-
-  // tof 5
-  tof5.enable(true);
-  tof5.begin();
-  delay(10);
-
-  // tof 6
-  tof6.enable(true);
-  tof6.begin();
   delay(10);
 }
 
