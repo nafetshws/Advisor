@@ -33,12 +33,10 @@ Motor motorA = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
 Motor motorB = Motor(MOTORB_IN1, MOTORB_IN2, MOTORB_PWM, MOTORB_PWM_CHANNEL);
 
 // TOF Sensor Objects
-TOF tofLeft =         TOF(1, TOF_START_ADDR + 0, TOF1_SHT_PIN);
-TOF tofLeftFront =    TOF(2, TOF_START_ADDR + 1, TOF2_SHT_PIN);
-TOF tofRightFront =   TOF(3, TOF_START_ADDR + 2, TOF3_SHT_PIN);
-TOF tofRight =        TOF(4, TOF_START_ADDR + 3, TOF4_SHT_PIN);
-TOF tofLeft45 =       TOF(5, TOF_START_ADDR + 4, TOF5_SHT_PIN);
-TOF tofRight45 =      TOF(6, TOF_START_ADDR + 5, TOF6_SHT_PIN);
+TOF tofLeftFront =   TOF(1, TOF_START_ADDR + 1, TOF2_SHT_PIN);
+TOF tofRightFront =  TOF(2, TOF_START_ADDR + 2, TOF3_SHT_PIN);
+TOF tofLeft =        TOF(3, TOF_START_ADDR + 3, TOF4_SHT_PIN);
+TOF tofRight =       TOF(4, TOF_START_ADDR + 4, TOF1_SHT_PIN);
 
 
 
@@ -71,7 +69,7 @@ void setup() {
   Serial.println("SETUP: Try to connect to TOF sensors...");
 
   // init all the tof sensors
-  initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight, tofLeft45, tofRight45);
+  initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight);
 
   Serial.println("SETUP: TOF Sensors initialised");
 
