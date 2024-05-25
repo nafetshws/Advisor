@@ -7,6 +7,9 @@ class IR {
     public:
         // Output pin (digital) of sensor
         uint8_t IR_SENSOR_PIN;
+
+        // Empty default constructor
+        IR ();
  
         /**
          * @brief   Create new IR sensor object 

@@ -1,18 +1,18 @@
 #include "../../include/motor.hpp"
 #include <Arduino.h>
 
+Motor::Motor() {
+    //Empty Constrcutor
+}
 
 Motor::Motor (uint8_t pinA, uint8_t pinB, uint8_t pinPWM, uint8_t pwmChannel) {
-
     this->pinA = pinA;
     this->pinB = pinB;
     this->pinPWM = pinPWM;
     this->pwmChannel = pwmChannel;
 }
 
-
 void Motor::initialise() {
-
     // Configure PWM Channels
     ledcSetup(pwmChannel, MOTOR_PWM_FREQUENCY, MOTOR_PWM_RESOLUTION);
 
@@ -26,7 +26,6 @@ void Motor::initialise() {
 
 
 void Motor::turnForward(uint8_t speed) {
-
     // set direction forward
     digitalWrite(pinA, HIGH);
     digitalWrite(pinB, LOW);
@@ -38,7 +37,6 @@ void Motor::turnForward(uint8_t speed) {
 
 
 void Motor::turnBackward(uint8_t speed) {
-
     // set direction backward
     digitalWrite(pinA, LOW);
     digitalWrite(pinB, HIGH);

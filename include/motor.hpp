@@ -15,6 +15,7 @@
 class Motor {
 
 public:
+    Motor();
 
     /**
      * @brief   Creates a motor object for the TB6612FNG motor driver
