@@ -19,25 +19,27 @@
 #define MOTORB_ENCODER1 35
 #define MOTORB_ENCODER2 34
 
-// PINS TOF SENSORS
-#define TOF1_SHT_PIN 32
-#define TOF2_SHT_PIN 33
-#define TOF3_SHT_PIN 25
-#define TOF4_SHT_PIN 26
-#define TOF5_SHT_PIN 27
-#define TOF6_SHT_PIN 14
+// PINS TOF/IR SENSORS
+#define SENSOR_SLOT_1 32    // IR
+#define SENSOR_SLOT_2 33    // IR
+#define SENSOR_SLOT_3 25    // TOF
+#define SENSOR_SLOT_4 26    // TOF
+#define SENSOR_SLOT_5 27    // empty
+#define SENSOR_SLOT_6 14    // emtpy
 
+
+
+// GLOBAL OBJECTS ///////////////////////////////
 
 // Global Motor Objects
 Motor motorA = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
 Motor motorB = Motor(MOTORB_IN1, MOTORB_IN2, MOTORB_PWM, MOTORB_PWM_CHANNEL);
 
 // TOF Sensor Objects
-TOF tofLeftFront =   TOF(1, TOF_START_ADDR + 1, TOF2_SHT_PIN);
-TOF tofRightFront =  TOF(2, TOF_START_ADDR + 2, TOF3_SHT_PIN);
-TOF tofLeft =        TOF(3, TOF_START_ADDR + 3, TOF4_SHT_PIN);
-TOF tofRight =       TOF(4, TOF_START_ADDR + 4, TOF1_SHT_PIN);
-
+TOF tofLeftFront =   TOF(1, TOF_START_ADDR + 1, SENSOR_SLOT_3);
+TOF tofRightFront =  TOF(2, TOF_START_ADDR + 2, SENSOR_SLOT_4);
+// TOF tofLeft =        TOF(3, TOF_START_ADDR + 3, SENSOR_SLOT_5);
+// TOF tofRight =       TOF(4, TOF_START_ADDR + 4, SENSOR_SLOT_6);
 
 
 
@@ -69,7 +71,8 @@ void setup() {
   Serial.println("SETUP: Try to connect to TOF sensors...");
 
   // init all the tof sensors
-  initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight);
+  // initTofSensors(tofLeft, tofLeftFront, tofRightFront, tofRight);
+  initTofSensors(tofLeftFront, tofRightFront);
 
   Serial.println("SETUP: TOF Sensors initialised");
 
@@ -78,10 +81,12 @@ void setup() {
   Serial.println("Start Looping:");
 }
 
+
+
+
 void loop() {
 
   // Read out Tof Sensor data
-  Serial.printf("Distanz von 1,2,3:\t%d\t%d\t%d\n", tofLeft.getDist(), tofLeftFront.getDist(), tofRightFront.getDist());
   delay(1000);
 
 }
