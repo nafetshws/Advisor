@@ -67,15 +67,22 @@ public:
 
 
 /**
- * @brief   Starts the communiction with each tof sensor and sets
+ * @brief   Starts the communiction with 2 tof sensor and sets
  *          the i2c address to the given value
  * @param   tof1 reference tof sensor 1
  * @param   tof2 reference tof sensor 2
- * @param   tof3 reference tof sensor 3
- * @param   tof4 reference tof sensor 4
- * @param   tof5 reference tof sensor 5
- * @param   tof6 reference tof sensor 6
 */
-void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4, TOF &tof5, TOF &tof6);
+void initTofSensors(TOF &tof1, TOF &tof2);
+
+
+/**
+ * @brief   Starts the communiction with 4 tof sensor and sets
+ *          the i2c address to the given value
+ * @param   tof1 reference tof sensor 1
+ * @param   tof2 reference tof sensor 2
+ * @param   tof3 reference tof sensor 2
+ * @param   tof4 reference tof sensor 2
+*/
+void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4);
 
 #endif
