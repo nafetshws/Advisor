@@ -50,6 +50,7 @@ class Robot {
         uint16_t turnTime;
         uint8_t turnSpeed;
         uint8_t driveSpeed;
+        uint8_t maxDriveSpeed;
 
         uint16_t wallDistance;
         uint8_t cellWidth; //in mm
