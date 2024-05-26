@@ -5,10 +5,6 @@ Robot::Robot() {
   this->motorA = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
   this->motorB = Motor(MOTORB_IN1, MOTORB_IN2, MOTORB_PWM, MOTORB_PWM_CHANNEL);
 
-  // TOF Sensor Objects
-  this->tofLeftFront =    TOF(2, TOF_START_ADDR + 1, TOF3_SHT_PIN);
-  this->tofRightFront =   TOF(3, TOF_START_ADDR + 2, TOF4_SHT_PIN);
-
   // IR Sensor objects
   this->leftIR = IR (TOF1_SHT_PIN);
   this->rightIR = IR (TOF1_SHT_PIN);
