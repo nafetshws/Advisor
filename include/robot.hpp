@@ -35,19 +35,25 @@
 
 class Robot {
     public:
-        Motor motorA; 
-        Motor motorB;
+        Motor motorRight; 
+        Motor motorLeft;
 
         // TOF Sensor Objects (MUST be constructed Robot.hpp, OTHERWISE ESP32 CRASHES)
         TOF tofLeftFront =    TOF(2, TOF_START_ADDR + 1, TOF3_SHT_PIN);
         TOF tofRightFront =   TOF(3, TOF_START_ADDR + 2, TOF4_SHT_PIN);
+        TOF tofLeft      =    TOF(2, TOF_START_ADDR + 3, TOF5_SHT_PIN);
+        TOF tofRight =        TOF(3, TOF_START_ADDR + 4, TOF6_SHT_PIN);
 
-        IR leftIR;
-        IR rightIR;
+        IR irLeft;
+        IR irRight;
         
         uint16_t turnTime;
         uint8_t turnSpeed;
         uint8_t driveSpeed;
+
+        uint16_t wallDistance;
+        uint8_t cellWidth; //in mm
+        uint8_t tofTurnError;
 
         Robot();
         void setupRobot();
@@ -65,6 +71,8 @@ class Robot {
         void driveTillObstacle();
         bool checkForStartSignal();
         bool checkForTurnSignal();
+        void correctTurnError();
+        void correctSteeringError();
 };
 
 #endif

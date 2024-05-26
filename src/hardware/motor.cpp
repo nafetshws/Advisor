@@ -46,13 +46,13 @@ void Motor::turnBackward(uint8_t speed) {
     this->speed = speed;
 }
 
-
 uint8_t Motor::getSpeed() {
     return this->speed;
 }
 
-
 void Motor::stopMotor() {
+    // TODO: Don't stop motor instantanious
+
     // disable direction
     digitalWrite(pinA, LOW);
     digitalWrite(pinB, LOW);
