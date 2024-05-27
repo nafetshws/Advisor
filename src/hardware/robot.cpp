@@ -78,30 +78,36 @@ void Robot::driveTillObstacle() {
   motorLeft.stopMotor();
 }
 
-void Robot::turnRight() {
+void Robot::turnRight(bool disableTurnErrorCorrection) {
   long startTime = millis();
 
+  motorRight.turnBackward(turnSpeed);
+  motorLeft.turnForward(turnSpeed);
+
   while (millis() - startTime < turnTime) {
-    motorRight.turnBackward(turnSpeed);
-    motorLeft.turnForward(turnSpeed);
+    delay(3);
   }
 
   motorRight.stopMotor();
   motorLeft.stopMotor();
 
-  this->correctTurnError();
+  if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
-void Robot::turnLeft() {
+void Robot::turnLeft(bool disableTurnErrorCorrection) {
   long startTime = millis();
+  
+  motorRight.turnForward(turnSpeed);
+  motorLeft.turnBackward(turnSpeed);
 
   while (millis() - startTime < turnTime) {
-    motorRight.turnForward(turnSpeed);
-    motorLeft.turnBackward(turnSpeed);
+    delay(3);
   }
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
+  if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
 void Robot::correctTurnError() {
@@ -119,14 +125,16 @@ void Robot::correctTurnError() {
       uint16_t turnTimeTmp = this->turnTime;
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference);
-      this->turnRight();
+      // Calls turnRight(), but disables error correction to avoid infinite recursion
+      this->turnRight(true);
       this->turnTime = turnTimeTmp;
     } else {
       // Turn left
       uint16_t turnTimeTmp = this->turnTime;
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference);
-      this->turnLeft();
+      // Calls turnLeft(), but disables error correction to avoid infinite recursion
+      this->turnLeft(true);
       this->turnTime = turnTimeTmp;
     }
 

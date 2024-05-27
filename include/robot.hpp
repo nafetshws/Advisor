@@ -65,8 +65,8 @@ class Robot {
         bool wallLeft();
 
         void moveForward(int distance = 1);
-        void turnRight();
-        void turnLeft();
+        void turnRight(bool disableTurnErrorCorrection = false);
+        void turnLeft(bool disableTurnErrorCorrection = false);
         ////////////////////////////////////////////
 
         void driveTillObstacle();
