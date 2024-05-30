@@ -26,7 +26,6 @@ void loop() {
     }
   }
 
-
   // uint16_t leftFrontDistance = robot.tofLeftFront.getDist();
   // uint16_t rightFrontDistance = robot.tofRightFront.getDist();
 
