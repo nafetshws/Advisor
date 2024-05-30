@@ -9,9 +9,13 @@
 #define TOF_START_ADDR 0x30
 
 // Error Offsets
-#define TOF_LEFT_FRONT_OFFSET 8 
-#define TOF_RIGHT_FRONT_OFFSET 23 
-#define TOF_LEFT_OFFSET 10 
+// #define TOF_LEFT_FRONT_OFFSET 8 
+// #define TOF_RIGHT_FRONT_OFFSET 23 
+// #define TOF_LEFT_OFFSET 10 
+// #define TOF_RIGHT_OFFSET 8 
+#define TOF_LEFT_FRONT_OFFSET 35 
+#define TOF_RIGHT_FRONT_OFFSET 3 
+#define TOF_LEFT_OFFSET 14 
 #define TOF_RIGHT_OFFSET 8 
 
 class TOF {

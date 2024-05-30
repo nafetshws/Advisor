@@ -212,9 +212,9 @@ void Robot::correctSteeringError() {
   int error;
   // float prevError = 0.00F;
   // float prevIterm = 0;
-  const float kp  = 0.5; // Tune (Proportional Constant)
+  const float kp  = 0.1; // Tune (Proportional Constant)
   // const float ki = 1; // Tune (Integral Constant)
-  const float kd = 0.6; // Tune (Derivative Constant)
+  const float kd = 0; // Tune (Derivative Constant)
 
   uint16_t leftToFReading = this->tofLeft.getDist(); 
   uint16_t rightToFReading = this->tofRight.getDist();
