@@ -33,16 +33,19 @@
 #define DIP_SWITCH_PIN_1 13
 #define DIP_SWITCH_PIN_2 12
 
+// Error bounds
+#define MIN_ERROR_THRESHOLD 5
+
 class Robot {
     public:
         Motor motorRight; 
         Motor motorLeft;
 
         // TOF Sensor Objects (MUST be constructed Robot.hpp, OTHERWISE ESP32 CRASHES)
-        TOF tofLeftFront =    TOF(2, TOF_START_ADDR + 1, TOF3_SHT_PIN);
-        TOF tofRightFront =   TOF(3, TOF_START_ADDR + 2, TOF4_SHT_PIN);
-        TOF tofLeft      =    TOF(2, TOF_START_ADDR + 3, TOF5_SHT_PIN);
-        TOF tofRight =        TOF(3, TOF_START_ADDR + 4, TOF6_SHT_PIN);
+        TOF tofLeftFront =    TOF(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
+        TOF tofRightFront =   TOF(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
+        TOF tofLeft      =    TOF(3, TOF_START_ADDR + 3, TOF5_SHT_PIN);
+        TOF tofRight =        TOF(4, TOF_START_ADDR + 4, TOF6_SHT_PIN);
 
         IR irLeft;
         IR irRight;
@@ -55,6 +58,10 @@ class Robot {
         uint16_t wallDistance;
         uint8_t cellWidth; //in mm
         uint8_t tofTurnError;
+
+        //PID
+        float prevError;
+        // float prevTime;
 
         Robot();
         void setupRobot();

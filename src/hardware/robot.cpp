@@ -16,6 +16,8 @@ Robot::Robot() {
   this->cellWidth = 160;
   this->tofTurnError = 10;
   this->maxDriveSpeed = 100;
+
+  this->prevError = 0.0f;
 }
 
 void Robot::setupRobot() {
@@ -40,7 +42,10 @@ void Robot::setupRobot() {
   Serial.println("SETUP: Try to connect to TOF sensors...");
 
   // init all the tof sensors
+
   initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
+  // initTofSensors(tofLeftFront, tofRightFront);;
+  // initTofSensors(tofLeft, tofRight);
 
   Serial.println("SETUP: TOF Sensors initialised");
 
@@ -91,7 +96,7 @@ void Robot::turnRight(bool disableTurnErrorCorrection) {
   motorRight.stopMotor();
   motorLeft.stopMotor();
 
-  if (!disableTurnErrorCorrection) this->correctTurnError();
+  // if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
 void Robot::turnLeft(bool disableTurnErrorCorrection) {
@@ -107,7 +112,7 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  if (!disableTurnErrorCorrection) this->correctTurnError();
+  // if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
 void Robot::correctTurnError() {
@@ -153,7 +158,7 @@ bool Robot::checkForStartSignal() {
   int switch1 = digitalRead(DIP_SWITCH_PIN_1) == 0 ? 1 : 0;
   int switch2 = digitalRead(DIP_SWITCH_PIN_2) == 0 ? 1 : 0;
 
-  Serial.printf("DIP1: %d\t DIP2: %d\n", switch1, switch2);
+  //Serial.printf("DIP1: %d\t DIP2: %d\n", switch1, switch2);
 
   return switch1 == HIGH && switch2 == HIGH; 
 }
@@ -196,6 +201,63 @@ void Robot::moveForward(int distance) {
 }
 
 void Robot::correctSteeringError() {
+  uint16_t startTime = millis();
+
+  float error;
+  // float prevError = 0.00F;
+  float prevIterm = 0;
+  const float kp  = 1; // Tune (Proportional Constant)
+  // const float ki = 1; // Tune (Integral Constant)
+  const float kd = 1; // Tune (Derivative Constant)
+
+  uint16_t leftToFReading = this->tofLeft.getDist(); 
+  uint16_t rightToFReading = this->tofRight.getDist();
+
+  error = leftToFReading - rightToFReading;
+
+  // The measured distance of the tof sensors varies in short period of time
+  // between +/- 5 mm, Therefore we shouldn't correct the error if it's lower than
+  // this threshold
+  if (abs(error) < MIN_ERROR_THRESHOLD) {
+      motorLeft.turnForward(this->driveSpeed);
+      motorRight.turnForward(this->driveSpeed);
+      return;
+  }
+
+  uint16_t dt = millis() - startTime;
+
+  // Calculate Proportional Term
+  float proportional = kp * error;
+  // Calculate Integral Term
+  // float integral = prevIterm + (ki * (error) * dt); 
+  // Calculate Derivative Term
+  float derivative = (kd*  (this->prevError - error) / dt);
+
+  this->prevError = error;
+
+  // float pidTerm = proportional + integral + derivative;
+  float pidTerm = proportional + derivative;
+
+  uint8_t leftMotorSpeedPid = this->motorRight.getSpeed() + (uint8_t) pidTerm;
+  uint8_t rightMotorSpeedPid = this->motorLeft.getSpeed() - (uint8_t) pidTerm;
+
+  if (leftMotorSpeedPid > this->maxDriveSpeed) { // Tune
+    leftMotorSpeedPid = this->maxDriveSpeed;
+  }
+  if (rightMotorSpeedPid > this->maxDriveSpeed)
+  {
+    rightMotorSpeedPid = this->maxDriveSpeed;
+  }
+
+  // Returns the turnForward or turnBackward Speed for Motors ////////
+  this->motorLeft.turnForward(leftMotorSpeedPid);
+  this->motorRight.turnForward(rightMotorSpeedPid);
+  ////////////////////////////////////////////////////////////////////
+
+}
+
+/*
+void Robot::correctSteeringError() {
   // bool isLeftTriggered = irLeft.isTriggered();
   // bool isRightTriggered = irRight.isTriggered();
 
@@ -219,7 +281,7 @@ void Robot::correctSteeringError() {
   error = leftToFReading - rightToFReading;
 
   float proportional = kp * error;
-  float integral = prevIterm + (ki * (error + prevError) * dt);  
+  float integral = prevIterm + (ki * (error + prevError) * dt); 
   float derivative = (kd*  (error + prevError) / dt);
 
   prevError = error;
@@ -243,3 +305,4 @@ void Robot::correctSteeringError() {
   ////////////////////////////////////////////////////////////////////
 
 }
+*/
