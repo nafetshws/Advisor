@@ -16,6 +16,6 @@ int main()
         }
     }
     floodfill(*Maze::startCell);
-    returnToBase();
-    run();
+    // returnToBase();
+    // run();
 }

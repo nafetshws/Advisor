@@ -89,16 +89,16 @@ void floodfillHelper(Cell &c, int direction)
 {
     if (c.distance == 0)
     {
-        direction_last = direction;
+        //direction_last = direction;
         return;
     }
 
     // if the cell is visited once again, remove loop from path
-    auto duplicate = std::find(path.begin(), path.end(), c);
-    if (duplicate != path.end())
-    {
-        path.erase(duplicate, path.end());
-    }
+    // auto duplicate = std::find(path.begin(), path.end(), c);
+    // if (duplicate != path.end())
+    // {
+    //     path.erase(duplicate, path.end());
+    // }
 
     // update walls
     updateWalls(c, direction);
@@ -198,7 +198,7 @@ void floodfillHelper(Cell &c, int direction)
     }
 
     // add visited cell to path
-    path.push_back(*nextCell);
+    // path.push_back(*nextCell);
 
     // next cell location
     floodfillHelper(*nextCell, direction);

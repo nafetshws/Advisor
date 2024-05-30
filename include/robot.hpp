@@ -5,6 +5,7 @@
 #include "tof.hpp"
 #include "ir.hpp"
 #include "encoder.hpp"
+//#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -35,6 +36,8 @@
 
 // Error bounds
 #define MIN_ERROR_THRESHOLD 5
+#define MAX_ERROR_THRESHOLD 50
+
 
 class Robot {
     public:
@@ -60,8 +63,11 @@ class Robot {
         uint8_t tofTurnError;
 
         //PID
-        float prevError;
+        int prevError;
         // float prevTime;
+
+        // Bluetooth Serial
+        //BluetoothSerial btSerial;
 
         Robot();
         void setupRobot();

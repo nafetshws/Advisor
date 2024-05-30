@@ -1,4 +1,5 @@
 #include "../include/robot.hpp"
+#include "BluetoothSerial.h"
 #include <cstdint>
 
 Robot::Robot() {
@@ -11,13 +12,14 @@ Robot::Robot() {
 
   this->turnTime = 270;
   this->turnSpeed = 80;
-  this->driveSpeed = 50;
+  this->driveSpeed = 60;
   this->wallDistance = 120;
   this->cellWidth = 160;
   this->tofTurnError = 10;
   this->maxDriveSpeed = 100;
 
   this->prevError = 0.0f;
+
 }
 
 void Robot::setupRobot() {
@@ -25,6 +27,8 @@ void Robot::setupRobot() {
 
   // start serial monitor
   Serial.begin(115200);
+  // start 
+  // btSerial.begin("BallE BluetoothTestInterface");
   Serial.println("\nSETUP: Serial Monitor running");
 
   // SETUP MOTORS ///////////////////////////////
@@ -58,7 +62,7 @@ void Robot::setupRobot() {
 }
 
 void Robot::driveTillObstacle() {
-  uint16_t max_distance = 85;
+  uint16_t max_distance = 60;
 
   uint16_t topLeftDistance  = this->tofLeftFront.getDist();
   uint16_t topRightDistance = this->tofRightFront.getDist();
@@ -68,7 +72,7 @@ void Robot::driveTillObstacle() {
   motorRight.turnForward(driveSpeed);
   motorLeft.turnForward(driveSpeed);
   
-  Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
+  // Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
 
   while (topLeftDistance > max_distance && topRightDistance > max_distance) {
     topLeftDistance = tofLeftFront.getDist();
@@ -76,7 +80,9 @@ void Robot::driveTillObstacle() {
     irLeftDistance = irLeft.isTriggered();
     irRightDistance = irRight.isTriggered();
 
-    Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
+    this->correctSteeringError();
+
+    // Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
   }
 
   motorRight.stopMotor();
@@ -96,7 +102,7 @@ void Robot::turnRight(bool disableTurnErrorCorrection) {
   motorRight.stopMotor();
   motorLeft.stopMotor();
 
-  // if (!disableTurnErrorCorrection) this->correctTurnError();
+  if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
 void Robot::turnLeft(bool disableTurnErrorCorrection) {
@@ -112,7 +118,7 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  // if (!disableTurnErrorCorrection) this->correctTurnError();
+  if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
 void Robot::correctTurnError() {
@@ -129,7 +135,7 @@ void Robot::correctTurnError() {
       // Turn right
       uint16_t turnTimeTmp = this->turnTime;
       // rotation time is proportional to the distance difference between the tof sensors
-      this->turnTime = abs(distanceDifference);
+      this->turnTime = abs(distanceDifference) / 4;
       // Calls turnRight(), but disables error correction to avoid infinite recursion
       this->turnRight(true);
       this->turnTime = turnTimeTmp;
@@ -137,7 +143,7 @@ void Robot::correctTurnError() {
       // Turn left
       uint16_t turnTimeTmp = this->turnTime;
       // rotation time is proportional to the distance difference between the tof sensors
-      this->turnTime = abs(distanceDifference);
+      this->turnTime = abs(distanceDifference) / 4;
       // Calls turnLeft(), but disables error correction to avoid infinite recursion
       this->turnLeft(true);
       this->turnTime = turnTimeTmp;
@@ -189,7 +195,7 @@ void Robot::moveForward(int distance) {
 
   do {
     // Insert error correction /////
-    //this->correctSteeringError();
+    this->correctSteeringError();
     ////////////////////////////////
     currentDistanceLeft = tofLeftFront.getDist();
     currentDistanceRight = tofRightFront.getDist();
@@ -203,12 +209,12 @@ void Robot::moveForward(int distance) {
 void Robot::correctSteeringError() {
   uint16_t startTime = millis();
 
-  float error;
+  int error;
   // float prevError = 0.00F;
-  float prevIterm = 0;
-  const float kp  = 1; // Tune (Proportional Constant)
+  // float prevIterm = 0;
+  const float kp  = 0.5; // Tune (Proportional Constant)
   // const float ki = 1; // Tune (Integral Constant)
-  const float kd = 1; // Tune (Derivative Constant)
+  const float kd = 0.6; // Tune (Derivative Constant)
 
   uint16_t leftToFReading = this->tofLeft.getDist(); 
   uint16_t rightToFReading = this->tofRight.getDist();
@@ -218,7 +224,7 @@ void Robot::correctSteeringError() {
   // The measured distance of the tof sensors varies in short period of time
   // between +/- 5 mm, Therefore we shouldn't correct the error if it's lower than
   // this threshold
-  if (abs(error) < MIN_ERROR_THRESHOLD) {
+  if (abs(error) < MIN_ERROR_THRESHOLD || abs(error) > MAX_ERROR_THRESHOLD) {
       motorLeft.turnForward(this->driveSpeed);
       motorRight.turnForward(this->driveSpeed);
       return;
@@ -238,8 +244,10 @@ void Robot::correctSteeringError() {
   // float pidTerm = proportional + integral + derivative;
   float pidTerm = proportional + derivative;
 
-  uint8_t leftMotorSpeedPid = this->motorRight.getSpeed() + (uint8_t) pidTerm;
-  uint8_t rightMotorSpeedPid = this->motorLeft.getSpeed() - (uint8_t) pidTerm;
+  Serial.printf("Error: %d\tmotor left: %d\tmotor righ: %d\tPidTerm: %f\n", error, motorLeft.getSpeed(), motorRight.getSpeed(), pidTerm);
+
+  uint8_t leftMotorSpeedPid = this->motorRight.getSpeed() - (uint8_t) pidTerm;
+  uint8_t rightMotorSpeedPid = this->motorLeft.getSpeed() + (uint8_t) pidTerm;
 
   if (leftMotorSpeedPid > this->maxDriveSpeed) { // Tune
     leftMotorSpeedPid = this->maxDriveSpeed;

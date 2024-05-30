@@ -3,10 +3,11 @@
 
 #include <string>
 #include <vector>
+#include "floodfill.hpp"
 
 // Vektor fuer Wegspeicherung
-std::vector<Cell> path;
-int direction_last;
+// std::vector<Cell> path;
+// int direction_last;
 
 // MMS uses stdin/stdout for communication. In order to log text, we need to use cerr
 #if DEBUG == 1

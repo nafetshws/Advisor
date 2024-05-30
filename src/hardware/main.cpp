@@ -15,6 +15,18 @@ void setup() {
 
 
 void loop() {
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    robot.driveTillObstacle();
+
+    printf("finished\n");
+
+    while (1) {
+      delay(100); 
+    }
+  }
+
+
   // uint16_t leftFrontDistance = robot.tofLeftFront.getDist();
   // uint16_t rightFrontDistance = robot.tofRightFront.getDist();
 
@@ -29,21 +41,29 @@ void loop() {
 
   // delay(100);
 
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    robot.driveTillObstacle();
-    delay(delayTime);
-    robot.turnRight();
-    delay(delayTime);
-    robot.driveTillObstacle();
-    delay(delayTime);
-    robot.turnRight();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+    // robot.moveForward(3);
+    // robot.driveTillObstacle();
+    // Serial.printf("Finished");
+    // delay(delayTime);
+    // robot.moveForward(1);
+    // delay(delayTime);
+    // robot.moveForward(1);
+    // delay(startDelayTime);
+    // robot.driveTillObstacle();
+    // delay(delayTime);
+    // robot.turnRight();
+    // delay(delayTime);
+    // robot.driveTillObstacle();
+    // delay(delayTime);
+    // robot.turnRight();
 
-    while (1) {
-      Serial.printf("LOOPING EXITING\n");
-      delay(100);
-    }
-  }
+    // while (1) {
+    //   // Serial.printf("LOOPING EXITING\n");
+    //   delay(100);
+    // }
+  // }
 
 
   // if (robot.checkForStartSignal()) {
