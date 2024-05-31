@@ -12,6 +12,27 @@ long long sumRight = 0;
 long long sumLeftFront = 0;
 long long sumRightFront = 0;
 
+void testToFSensors() {
+  uint16_t leftFrontDistance = robot.tofLeftFront.getDist();
+  uint16_t rightFrontDistance = robot.tofRightFront.getDist();
+  uint16_t leftDistance = robot.tofLeft.getDist();
+  uint16_t rightDistance = robot.tofRight.getDist();
+
+  sumLeftFront += leftFrontDistance;
+  sumRightFront += rightFrontDistance;
+  sumLeft += leftDistance;
+  sumRight += rightDistance;
+
+  counter++;
+
+  int averageLeftFront = sumLeftFront / counter;
+  int averageRightFront = sumRightFront / counter;
+  int averageLeft = sumLeft / counter;
+  int averageRight = sumRight / counter;
+
+  Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+}
+
 void setup() {
   robot.setupRobot();
 }
@@ -28,79 +49,4 @@ void loop() {
       delay(100); 
     }
   }
-
-
-  // uint16_t leftFrontDistance = robot.tofLeftFront.getDist();
-  // uint16_t rightFrontDistance = robot.tofRightFront.getDist();
-  // uint16_t leftDistance = robot.tofLeft.getDist();
-  // uint16_t rightDistance = robot.tofRight.getDist();
-
-  // sumLeftFront += leftFrontDistance;
-  // sumRightFront += rightFrontDistance;
-  // sumLeft += leftDistance;
-  // sumRight += rightDistance;
-
-  // counter++;
-
-  // int averageLeftFront = sumLeftFront / counter;
-  // int averageRightFront = sumRightFront / counter;
-  // int averageLeft = sumLeft / counter;
-  // int averageRight = sumRight / counter;
-
-  // Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
-
-  // delay(100);
-
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-    // robot.moveForward(3);
-    // robot.driveTillObstacle();
-    // Serial.printf("Finished");
-    // delay(delayTime);
-    // robot.moveForward(1);
-    // delay(delayTime);
-    // robot.moveForward(1);
-    // delay(startDelayTime);
-    // robot.driveTillObstacle();
-    // delay(delayTime);
-    // robot.turnRight();
-    // delay(delayTime);
-    // robot.driveTillObstacle();
-    // delay(delayTime);
-    // robot.turnRight();
-
-    // while (1) {
-    //   // Serial.printf("LOOPING EXITING\n");
-    //   delay(100);
-    // }
-  // }
-
-
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-  //   robot.driveTillObstacle();
-  //   delay(delayTime);
-  //   robot.turnRight();
-  //   delay(delayTime);
-  //   robot.driveTillObstacle();
-  //   delay(delayTime);
-  //   robot.turnRight();
-  //   delay(delayTime);
-  //   robot.driveTillObstacle();
-  //   delay(delayTime);
-  //   robot.turnRight();
-  //   delay(delayTime);
-  //   robot.driveTillObstacle();
-  //   while (1) {
-  //     delay(delayTime);
-  //     robot.turnRight();
-  //     delay(delayTime);
-  //     robot.driveTillObstacle();
-  //   }
-
-  //   while (1) {
-  //     Serial.printf("LOOPING EXITING\n");
-  //   }
-  // }
-  // return;
 }

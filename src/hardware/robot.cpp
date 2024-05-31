@@ -234,8 +234,6 @@ void Robot::correctSteeringError() {
 
   // Calculate Proportional Term
   float proportional = kp * error;
-  // Calculate Integral Term
-  // float integral = prevIterm + (ki * (error) * dt); 
   // Calculate Derivative Term
   float derivative = (kd*  (this->prevError - error) / dt);
 
@@ -263,54 +261,3 @@ void Robot::correctSteeringError() {
   ////////////////////////////////////////////////////////////////////
 
 }
-
-/*
-void Robot::correctSteeringError() {
-  // bool isLeftTriggered = irLeft.isTriggered();
-  // bool isRightTriggered = irRight.isTriggered();
-
-  // if (isLeftTriggered && isRightTriggered) return;
-  
-  //
-
-  float error = 0.00F;
-  float prevError = 0.00F;
-  float prevIterm = 0;
-  const uint8_t kp  = 0; // Tune (Proportional Constant)
-  const uint8_t ki = 0; // Tune (Integral Constant)
-  const uint8_t kd = 0; // Tune (Derivative Constant)
-
-  uint16_t startTime = millis();
-  uint16_t leftToFReading = this->tofLeft.getDist(); 
-  uint16_t rightToFReading = this->tofRight.getDist();
-  uint16_t endTime = millis();
-
-  uint16_t dt = endTime - startTime;
-  error = leftToFReading - rightToFReading;
-
-  float proportional = kp * error;
-  float integral = prevIterm + (ki * (error + prevError) * dt); 
-  float derivative = (kd*  (error + prevError) / dt);
-
-  prevError = error;
-
-  float pidTerm = proportional + integral + derivative;
-
-  uint8_t leftMotorSpeedPid = this->motorRight.getSpeed() + (uint8_t) pidTerm;
-  uint8_t rightMotorSpeedPid = this->motorLeft.getSpeed() - (uint8_t) pidTerm;
-
-  if (leftMotorSpeedPid > this->maxDriveSpeed) { // Tune
-    leftMotorSpeedPid = this->maxDriveSpeed;
-  }
-  if (rightMotorSpeedPid > this->maxDriveSpeed)
-  {
-    rightMotorSpeedPid = this->maxDriveSpeed;
-  }
-
-  // Returns the turnForward or turnBackward Speed for Motors ////////
-  this->motorLeft.turnForward(leftMotorSpeedPid);
-  this->motorRight.turnForward(rightMotorSpeedPid);
-  ////////////////////////////////////////////////////////////////////
-
-}
-*/

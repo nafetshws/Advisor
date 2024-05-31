@@ -35,8 +35,8 @@
 #define DIP_SWITCH_PIN_2 12
 
 // Error bounds
-#define MIN_ERROR_THRESHOLD 5
-#define MAX_ERROR_THRESHOLD 50
+#define MIN_ERROR_THRESHOLD 10
+#define MAX_ERROR_THRESHOLD 100
 
 
 class Robot {
