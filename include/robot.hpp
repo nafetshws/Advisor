@@ -5,6 +5,7 @@
 #include "tof.hpp"
 #include "ir.hpp"
 #include "encoder.hpp"
+//#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -33,21 +34,40 @@
 #define DIP_SWITCH_PIN_1 13
 #define DIP_SWITCH_PIN_2 12
 
+// Error bounds
+#define MIN_ERROR_THRESHOLD 10
+#define MAX_ERROR_THRESHOLD 100
+
+
 class Robot {
     public:
-        Motor motorA; 
-        Motor motorB;
+        Motor motorRight; 
+        Motor motorLeft;
 
         // TOF Sensor Objects (MUST be constructed Robot.hpp, OTHERWISE ESP32 CRASHES)
-        TOF tofLeftFront =    TOF(2, TOF_START_ADDR + 1, TOF3_SHT_PIN);
-        TOF tofRightFront =   TOF(3, TOF_START_ADDR + 2, TOF4_SHT_PIN);
+        TOF tofLeftFront =    TOF(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
+        TOF tofRightFront =   TOF(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
+        TOF tofLeft      =    TOF(3, TOF_START_ADDR + 3, TOF5_SHT_PIN);
+        TOF tofRight =        TOF(4, TOF_START_ADDR + 4, TOF6_SHT_PIN);
 
-        IR leftIR;
-        IR rightIR;
+        IR irLeft;
+        IR irRight;
         
         uint16_t turnTime;
         uint8_t turnSpeed;
         uint8_t driveSpeed;
+        uint8_t maxDriveSpeed;
+
+        uint16_t wallDistance;
+        uint8_t cellWidth; //in mm
+        uint8_t tofTurnError;
+
+        //PID
+        int prevError;
+        // float prevTime;
+
+        // Bluetooth Serial
+        //BluetoothSerial btSerial;
 
         Robot();
         void setupRobot();
@@ -58,13 +78,15 @@ class Robot {
         bool wallLeft();
 
         void moveForward(int distance = 1);
-        void turnRight();
-        void turnLeft();
+        void turnRight(bool disableTurnErrorCorrection = false);
+        void turnLeft(bool disableTurnErrorCorrection = false);
         ////////////////////////////////////////////
 
         void driveTillObstacle();
         bool checkForStartSignal();
         bool checkForTurnSignal();
+        void correctTurnError();
+        void correctSteeringError();
 };
 
 #endif
