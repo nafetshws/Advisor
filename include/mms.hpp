@@ -2,23 +2,17 @@
 #define MMS_HPP
 
 #include <string>
-#include <vector>
-#include "floodfill.hpp"
 
-// Vektor fuer Wegspeicherung
-// std::vector<Cell> path;
-// int direction_last;
-
-// MMS uses stdin/stdout for communication. In order to log text, we need to use cerr
+//MMS uses stdin/stdout for communication. In order to log text, we need to use cerr
 #if DEBUG == 1
 #define LOG(text) (std::cerr << text << std::endl)
 #else
-#define LOG(text)
+#define LOG(text) 
 #endif
 
+
 // Read about it at: https://github.com/mackorone/mms
-class MMS
-{
+class MMS {
 
 public:
     static int mazeWidth();
@@ -39,12 +33,13 @@ public:
     static void clearColor(int x, int y);
     static void clearAllColor();
 
-    static void setText(int x, int y, const std::string &text);
+    static void setText(int x, int y, const std::string& text);
     static void clearText(int x, int y);
     static void clearAllText();
 
     static bool wasReset();
     static void ackReset();
+
 };
 
 #endif
