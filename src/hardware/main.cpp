@@ -104,7 +104,6 @@ void loop() {
   // robot.motorLeft.turnForward(50);
   // robot.motorRight.turnForward(50);
 
-  //
   // do {
   //   leftEncoder = getEncLeft();
   //   rightEncoder = getEncRight();
