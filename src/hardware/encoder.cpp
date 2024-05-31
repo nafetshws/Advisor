@@ -73,3 +73,11 @@ uint32_t getEncRight() {
 uint32_t getEncLeft() {
     return ENC_LEFT_COUNT;
 }
+
+void resetLeftEncoder() {
+    ENC_LEFT_COUNT = 0;
+}
+
+void resetRightEncoder() {
+    ENC_RIGHT_COUNT = 0;
+}

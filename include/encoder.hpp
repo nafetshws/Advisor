@@ -93,4 +93,7 @@ uint32_t getEncRight();
 
 uint32_t getEncLeft();
 
+void resetLeftEncoder();
+void resetRightEncoder();
+
 #endif

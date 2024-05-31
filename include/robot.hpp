@@ -5,7 +5,7 @@
 #include "tof.hpp"
 #include "ir.hpp"
 #include "encoder.hpp"
-//#include <BluetoothSerial.h>
+#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -64,10 +64,12 @@ class Robot {
 
         //PID
         int prevError;
-        // float prevTime;
+        float KP;
+        float KD;
 
         // Bluetooth Serial
-        //BluetoothSerial btSerial;
+        BluetoothSerial btSerial;
+
 
         Robot();
         void setupRobot();
