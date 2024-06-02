@@ -3,6 +3,9 @@
 
 #include <cstdint>
 #include <vector>
+#include <queue>
+#include <set>
+#include <map>
 
 /**
  * Represents a cell using only 4 bytes.
@@ -44,7 +47,6 @@ struct Cell
 
 struct Maze
 {
-public:
     static Cell maze[SIZE][SIZE];
     static std::vector<Cell*> floodfillPath;
     static std::vector<Cell*> floodfillReversePath;
@@ -65,13 +67,32 @@ public:
     static Cell *endCell; // cell where the previous run has ended
 };
 
+struct Graph 
+{
+    std::set<Cell*> vertices;
+    std::set<std::pair<Cell*, Cell*>> edges;
+    std::map<Cell*, std::vector<Cell*>> graph;
+
+    std::map<Cell*, Cell*> par;
+    std::map<Cell*, int> dist;
+
+    void addVertex(Cell* c);
+    void addEdge(Cell* a, Cell* b);
+
+    void bfsInit();
+    void print(Cell* S, Cell* D);
+    void bfs(Cell* S);
+};
+
+extern Graph g;
+
 uint8_t calculateManhattanDistance(const Cell &cell1, const Cell &cell2);
 void floodfill(Cell &c, int direction = 0);
 void floodfillHelper(Cell &c, int direction);
 bool isOpenNeighbor(Cell &c, Cell &neighbor);
 void updateWalls(Cell &cell, int direction);
 int mod(int a, int b);
+void optimisePath();
 
 extern int direction_last;
-
 #endif

@@ -17,6 +17,7 @@ Cell *Maze::endCell;
 std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
+Graph g;
 
 int direction_last;
 
@@ -196,6 +197,9 @@ void floodfillHelper(Cell &c, int direction)
         MMS::turnLeft();
         MMS::moveForward();
     }
+
+    g.addVertex(&c);
+    g.addEdge(&c, nextCell);
     floodfillHelper(*nextCell, direction);
 }
 
@@ -290,3 +294,13 @@ int mod(int a, int b) {
     }
     return res;
 }
+
+void Graph::addVertex(Cell* c)
+{
+    vertices.insert(c);
+};
+
+void Graph::addEdge(Cell* a, Cell* b)
+{
+    edges.insert(std::make_pair(a,b));
+};

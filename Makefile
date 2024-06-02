@@ -1,4 +1,4 @@
-FILES = src/mms/mms.cpp src/algorithms/floodfill.cpp #append your new cpp file
+FILES = src/mms/mms.cpp src/algorithms/floodfill.cpp src/algorithms/optimisation.cpp #append your new cpp file
 TEST_FILES = test/test.cpp
 
 OUT = build/main

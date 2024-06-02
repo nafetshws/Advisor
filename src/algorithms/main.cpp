@@ -25,4 +25,6 @@ int main() {
     }
 
     floodfill(*Maze::endCell, direction_last);
+
+    optimisePath();
 }
