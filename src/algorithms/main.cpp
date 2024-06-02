@@ -16,6 +16,17 @@ int main()
         }
     }
     floodfill(*Maze::startCell);
-    // returnToBase();
-    // run();
+
+    // std::cerr<<"lastdir: "<<direction_last<<std::endl;
+    Maze::initMazeReverse();
+
+    for (int y = 0; y < SIZE; y++)
+    {
+        for (int x = 0; x < SIZE; x++)
+        {
+            MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
+        }
+    }
+
+    floodfill(*Maze::endCell, direction_last);
 }
