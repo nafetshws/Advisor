@@ -20,6 +20,7 @@ void Maze::initMaze() {
         for(int x = 0; x < SIZE; x++) {
             Maze::get(x, y)->x = x;
             Maze::get(x, y)->y = y;
+            Maze::get(x, y)->discovered = false;
 
             //set walls that surround the maze
             if(y == 0) {
@@ -64,20 +65,47 @@ void Maze::initMaze() {
     Maze::startCell = Maze::get(0, 0);
 }
 
-Cell* Maze::get(uint8_t x, uint8_t y) {
+void Maze::initMazeReverse()
+{
+    Maze::center1 = Maze::get(0, 0);
+
+    // calculate Manhattan distance of each cell
+    for (int y = 0; y < SIZE; y++)
+    {
+        for (int x = 0; x < SIZE; x++)
+        {
+            Maze::get(x, y)->distance = calculateManhattanDistance(*Maze::get(x, y), *center1);
+        }
+    }
+    // set start cell
+    Maze::startCell = Maze::endCell;
+}
+
+Cell *Maze::get(uint8_t x, uint8_t y)
+{
     return &Maze::maze[y][x];
 }
 
-void floodfill(Cell& c) {
-    floodfillHelper(c, 0);
+void floodfill(Cell &c, int direction)
+{
+    floodfillHelper(c, direction);
 }
 
 // Modified flood fill algorithm
-void floodfillHelper(Cell& c, int direction) {
-    if(c.distance == 0) return;
+void floodfillHelper(Cell &c, int direction)
+{
+    if (c.distance == 0)
+    {
+        direction_last = direction;
+        Maze::endCell = &c;
+        std::cerr << "direction:" << direction << " direction_last:" << direction_last << std::endl;
+
+        return;
+    }
 
     //update walls
     updateWalls(c, direction);
+    c.discovered = true;
 
     std::stack<Cell*> stack;
     stack.push(&c);
