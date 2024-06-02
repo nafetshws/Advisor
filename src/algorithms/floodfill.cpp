@@ -14,7 +14,9 @@ Cell *Maze::center3;
 Cell *Maze::center4;
 Cell *Maze::startCell;
 Cell *Maze::endCell;
-// std::vector<Cell> path;
+std::vector<Cell*> Maze::floodfillPath;
+std::vector<Cell*> Maze::floodfillReversePath;
+bool Maze::reverseMode;
 
 int direction_last;
 
@@ -80,6 +82,7 @@ void Maze::initMaze()
 
 void Maze::initMazeReverse()
 {
+    Maze::reverseMode = true;
     Maze::center1 = Maze::get(0, 0);
 
     // calculate Manhattan distance of each cell
@@ -107,6 +110,13 @@ void floodfill(Cell &c, int direction)
 // Modified flood fill algorithm
 void floodfillHelper(Cell &c, int direction)
 {
+    // add visited cell to path of robot
+    if (Maze::reverseMode) {
+        Maze::floodfillReversePath.push_back(&c);
+    } else {
+        Maze::floodfillPath.push_back(&c);
+    }
+
     if (c.distance == 0)
     {
         direction_last = direction;
@@ -220,9 +230,6 @@ void floodfillHelper(Cell &c, int direction)
         MMS::turnLeft();
         MMS::moveForward();
     }
-
-    // add visited cell to path
-    // path.push_back(*nextCell);
 
     // next cell location
     floodfillHelper(*nextCell, direction);

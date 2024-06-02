@@ -2,6 +2,7 @@
 #define FLOODFILL_HPP
 
 #include <cstdint>
+#include <vector>
 
 /**
  * Represents a cell using only 4 bytes.
@@ -45,6 +46,10 @@ struct Maze
 {
 public:
     static Cell maze[SIZE][SIZE];
+    static std::vector<Cell*> floodfillPath;
+    static std::vector<Cell*> floodfillReversePath;
+
+    static bool reverseMode;
 
     static void initMaze();
     static void initMazeReverse();
