@@ -38,6 +38,9 @@
 #define MIN_ERROR_THRESHOLD 10
 #define MAX_ERROR_THRESHOLD 100
 
+// TODO: Update correct value
+#define WHEEL_CIRCUMFERENCE (6.28f)
+
 
 class Robot {
     public:
@@ -80,6 +83,7 @@ class Robot {
         bool wallLeft();
 
         void moveForward(int distance = 1);
+        void moveForwardUsingEncoders(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
         ////////////////////////////////////////////

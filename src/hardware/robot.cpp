@@ -277,6 +277,27 @@ void Robot::moveForward(int distance) {
   motorRight.stopMotor();
 }
 
+void Robot::moveForwardUsingEncoders(int distance) {
+  uint32_t startValueEncLeft = getEncLeft();
+  uint32_t startValueEncRight = getEncRight();
+
+  // TODO: update value for circumference
+  float wheelRotationsNeeded = (distance * 18) / WHEEL_CIRCUMFERENCE;
+  // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
+  float motorRotationsNeeded = wheelRotationsNeeded * 90;
+
+  motorLeft.turnForward(this->driveSpeed);
+  motorRight.turnForward(this->driveSpeed);
+
+  do {
+      this->correctSteeringError();
+  } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded ||
+           getEncRight() - startValueEncRight < motorRotationsNeeded);
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+}
+
 void Robot::correctSteeringError() {
   uint16_t startTime = millis();
 
@@ -287,8 +308,8 @@ void Robot::correctSteeringError() {
   // const float ki = 1; // Tune (Integral Constant)
   //const float kd = 0; // Tune (Derivative Constant)
 
-  uint16_t leftToFReading = this->tofLeft.getDist(); 
-  uint16_t rightToFReading = this->tofRight.getDist();
+  // uint16_t leftToFReading = this->tofLeft.getDist(); 
+  // uint16_t rightToFReading = this->tofRight.getDist();
 
   // error = leftToFReading - rightToFReading;
   error = getEncLeft() - getEncRight();
