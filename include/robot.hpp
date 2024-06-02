@@ -5,6 +5,7 @@
 #include "tof.hpp"
 #include "ir.hpp"
 #include "encoder.hpp"
+#include "imu.hpp"
 //#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
@@ -80,6 +81,8 @@ class Robot {
         void moveForward(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
+        void turnGyroLeft(float degrees = 0.0);
+        void turnGyroRight(float degrees = 0.0);
         ////////////////////////////////////////////
 
         void driveTillObstacle();
