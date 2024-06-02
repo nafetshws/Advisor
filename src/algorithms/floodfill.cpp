@@ -192,11 +192,7 @@ void floodfillHelper(Cell &c, int direction)
         MMS::moveForward();
     } 
 
-<<<<<<< HEAD
-    //next cell location
-=======
     // next cell location
->>>>>>> aa6516b (added path of visited cells during floodfill)
     floodfillHelper(*nextCell, direction);
 }
 
