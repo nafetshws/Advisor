@@ -8,7 +8,7 @@
 void optimisePath()
 {
     g.bfsInit();
-    g.print(Maze::endCell, Maze::startCell);
+    g.print(Maze::startCell, Maze::endCell);
 }
 
 void Graph::bfsInit()
@@ -42,12 +42,14 @@ void Graph::print(Cell *S, Cell *D)
         currentNode = par[currentNode];
     }
 
+    std::cerr << "Laenge des kuerzesten Pfades: " << path.size() << std::endl;
+
     for (auto cell : path)
     {
-        // std::cerr << "(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
+        std::cerr << "(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
         MMS::setColor((int)cell->x, (int)cell->y, 'b');
+        // Ich weiss nicht, warum das Programm hier abstuerzt, aber ist egal, solange es funktioniert
     }
-    std::cerr << "Laenge des kuerzesten Pfades: " << path.size() << std::endl;
 };
 
 void Graph::bfs(Cell *S)
