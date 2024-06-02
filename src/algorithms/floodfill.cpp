@@ -6,13 +6,17 @@
 #include "../../include/floodfill.hpp"
 #include "../../include/mms.hpp"
 
-//static variables
-Cell Maze::maze[SIZE][SIZE]; 
-Cell* Maze::center1;
-Cell* Maze::center2;
-Cell* Maze::center3;
-Cell* Maze::center4;
-Cell* Maze::startCell;
+// static variables
+Cell Maze::maze[SIZE][SIZE];
+Cell *Maze::center1;
+Cell *Maze::center2;
+Cell *Maze::center3;
+Cell *Maze::center4;
+Cell *Maze::startCell;
+Cell *Maze::endCell;
+std::vector<Cell*> Maze::floodfillPath;
+std::vector<Cell*> Maze::floodfillReversePath;
+bool Maze::reverseMode;
 
 void Maze::initMaze() {
     //init x and y values
@@ -67,6 +71,7 @@ void Maze::initMaze() {
 
 void Maze::initMazeReverse()
 {
+    Maze::reverseMode = true;
     Maze::center1 = Maze::get(0, 0);
 
     // calculate Manhattan distance of each cell
@@ -94,6 +99,13 @@ void floodfill(Cell &c, int direction)
 // Modified flood fill algorithm
 void floodfillHelper(Cell &c, int direction)
 {
+    // add visited cell to path of robot
+    if (Maze::reverseMode) {
+        Maze::floodfillReversePath.push_back(&c);
+    } else {
+        Maze::floodfillPath.push_back(&c);
+    }
+
     if (c.distance == 0)
     {
         direction_last = direction;
@@ -180,7 +192,11 @@ void floodfillHelper(Cell &c, int direction)
         MMS::moveForward();
     } 
 
+<<<<<<< HEAD
     //next cell location
+=======
+    // next cell location
+>>>>>>> aa6516b (added path of visited cells during floodfill)
     floodfillHelper(*nextCell, direction);
 }
 
