@@ -30,7 +30,7 @@ void Maze::initMaze()
         {
             Maze::get(x, y)->x = x;
             Maze::get(x, y)->y = y;
-            Maze::get(x, y)->discovered = false;
+            Maze::get(x, y)->dead = false;
 
             //set walls that surround the maze
             if(y == 0) {
@@ -97,6 +97,8 @@ Cell *Maze::get(uint8_t x, uint8_t y)
     return &Maze::maze[y][x];
 }
 
+
+
 void floodfill(Cell &c, int direction)
 {
     floodfillHelper(c, direction);
@@ -116,14 +118,11 @@ void floodfillHelper(Cell &c, int direction)
     {
         direction_last = direction;
         Maze::endCell = &c;
-        std::cerr << "direction:" << direction << " direction_last:" << direction_last << std::endl;
-
         return;
     }
 
     //update walls
     updateWalls(c, direction);
-    c.discovered = true;
 
     std::stack<Cell*> stack;
     stack.push(&c);

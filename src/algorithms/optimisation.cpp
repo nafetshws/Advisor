@@ -21,7 +21,6 @@ void Graph::bfsInit()
 
     for (Cell *cell : vertices)
     {
-        // std::cerr << "c(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
         MMS::setColor((int)cell->x, (int)cell->y, 'c');
         dist[cell] = 1e9;
     }
@@ -29,7 +28,6 @@ void Graph::bfsInit()
 
 void Graph::print(Cell *S, Cell *D)
 {
-
     Graph::bfs(S);
 
     std::vector<Cell *> path;
@@ -42,13 +40,14 @@ void Graph::print(Cell *S, Cell *D)
         currentNode = par[currentNode];
     }
 
-    std::cerr << "Laenge des kuerzesten Pfades: " << path.size() << std::endl;
+    int pathIndex = 0;
 
     for (auto cell : path)
     {
-        std::cerr << "(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
+        if (cell == NULL) break;
+
+        std::cerr << ++pathIndex << ":\t(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
         MMS::setColor((int)cell->x, (int)cell->y, 'b');
-        // Ich weiss nicht, warum das Programm hier abstuerzt, aber ist egal, solange es funktioniert
     }
 };
 
