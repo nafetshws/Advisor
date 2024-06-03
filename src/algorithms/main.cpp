@@ -4,6 +4,7 @@
 #include "../../include/floodfill.hpp"
 
 int main() {
+    //Floodfill
     Maze::initMaze();
 
     for(int y = 0; y < SIZE; y++) {
@@ -12,10 +13,10 @@ int main() {
         }
     }
     floodfill(*Maze::startCell);
+    optimisePath();
 
-    // std::cerr<<"lastdir: "<<direction_last<<std::endl;
+    // Reverse Floodfill
     Maze::initMazeReverse();
-
     for (int y = 0; y < SIZE; y++)
     {
         for (int x = 0; x < SIZE; x++)
@@ -25,6 +26,5 @@ int main() {
     }
 
     floodfill(*Maze::endCell, direction_last);
-
     optimisePath();
 }

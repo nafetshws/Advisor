@@ -7,8 +7,15 @@
 
 void optimisePath()
 {
+    MMS::clearAllColor();
     g.bfsInit();
-    g.print(Maze::startCell, Maze::endCell);
+
+    if (Maze::reverseMode)
+        g.print(Maze::startCell, Maze::endCell);
+    else
+        g.print(Maze::endCell, Maze::startCell);
+
+    std::cerr<<"---------End of "<< (Maze::reverseMode ? "Reverse Floodfill" : "Floodfill") << "---------"<<std::endl;
 }
 
 void Graph::bfsInit()
@@ -30,7 +37,7 @@ void Graph::print(Cell *S, Cell *D)
 {
     Graph::bfs(S);
 
-    std::vector<Cell *> path;
+    std::vector<Cell *> path{};
     Cell *currentNode = D;
     path.push_back(D);
 
