@@ -18,10 +18,13 @@ std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
 
-void Maze::initMaze() {
-    //init x and y values
-    for(int y = 0; y < SIZE; y++) {
-        for(int x = 0; x < SIZE; x++) {
+void Maze::initMaze()
+{
+    // init x and y values
+    for (int y = 0; y < SIZE; y++)
+    {
+        for (int x = 0; x < SIZE; x++)
+        {
             Maze::get(x, y)->x = x;
             Maze::get(x, y)->y = y;
             Maze::get(x, y)->discovered = false;

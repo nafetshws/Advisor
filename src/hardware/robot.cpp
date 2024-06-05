@@ -42,7 +42,7 @@ void Robot::setupRobot() {
   #include "../include/imu.hpp"
   motorLeft.initialise();
   // Initialise the motor encoders pins and interrupts, init timer interrupt
-  initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
+  // initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
 
   Serial.println("SETUP: Motor initialised");
 
