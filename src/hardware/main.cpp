@@ -42,53 +42,96 @@ void setup() {
   robot.setupRobot();
   resetLeftEncoder();
   resetRightEncoder();
+  initIMU(2000);
+  delay(1000);
 }
 
 
 void loop() {
+  // readRawGyro();
+  // calcGyro();
+  // Serial.printf("Winkelgeschwindigkeit (degree/s): %f  Winkel: %f\n", getYawRate(), getYawAngle());
+  // delay(50);
+
   if (robot.checkForStartSignal()) {
-    resetLeftEncoder();
-    resetRightEncoder();
-    delay(startDelayTime);
+    delay(delayTime);
     robot.driveTillObstacle();
-
-    robot.btSerial.printf("Finished course. Old tuning values. KP: %f, KD: %f\n", robot.KP, robot.KD);
-
-    bool hasChanged = false;
-    float kp;
-    float kd;
-
-    robot.btSerial.printf("KP: \n");
-
-    while (!hasChanged) {
-      if (robot.btSerial.available()) {
-        std::string kpAsString(robot.btSerial.readStringUntil('\n').c_str());
-        kp = std::stof(kpAsString);
-        hasChanged = true;
-      }
-    }
-
-    hasChanged = false;
-
-    robot.btSerial.printf("KD: \n");
-
-    while (!hasChanged) {
-      if (robot.btSerial.available()) {
-        std::string kdAsString(robot.btSerial.readStringUntil('\n').c_str());
-        kd = std::stof(kdAsString);
-        hasChanged = true;
-      }
-    }
-
-    robot.KP = kp;
-    robot.KD = kd;
-
-    // while (robot.checkForStartSignal()) {
-    //   delay(100);
-    // }
-
-    robot.btSerial.printf("Ready for next start! New kp: %f, New kd: %f\n", kp, kd);
+    delay(delayTime);
+    robot.turnGyroRight();
   }
+
+  // if (robot.checkForStartSignal()) {
+  //   resetLeftEncoder();
+  //   resetRightEncoder();
+  //   delay(startDelayTime);
+  //   robot.driveTillObstacle();
+  //   delay(delayTime);
+  //   robot.turnGyroRight();
+  //   delay(delayTime);
+  //   robot.moveForwardUsingEncoders(2);
+  //   delay(delayTime);
+  //   robot.turnGyroRight();
+  //   delay(delayTime);
+  //   robot.moveForwardUsingEncoders(2);
+  //   delay(delayTime);
+  //   robot.turnGyroRight();
+  //   delay(delayTime);
+  //   robot.moveForwardUsingEncoders(1);
+  //   delay(delayTime);
+  //   robot.turnGyroLeft();
+  //   delay(delayTime);
+  //   robot.moveForwardUsingEncoders();
+  //   delay(delayTime);
+  //   robot.turnGyroLeft();
+  //   delay(delayTime);
+  //   robot.driveTillObstacle();
+  //   delay(delayTime);
+  //   robot.turnGyroLeft();
+  //   delay(delayTime);
+  //   robot.driveTillObstacle();
+
+  //   robot.btSerial.printf("Finished course. Old tuning values. KP: %f, KD: %f\n", robot.KP, robot.KD);
+
+  //   bool hasChanged = false;
+  //   float kp;
+  //   float kd;
+
+  //   robot.btSerial.printf("KP: \n");
+
+  //   while (!hasChanged) {
+  //     if (robot.btSerial.available()) {
+  //       std::string kpAsString(robot.btSerial.readStringUntil('\n').c_str());
+  //       kp = std::stof(kpAsString);
+  //       hasChanged = true;
+  //     }
+  //   }
+
+  //   hasChanged = false;
+
+  //   robot.btSerial.printf("KD: \n");
+
+  //   while (!hasChanged) {
+  //     if (robot.btSerial.available()) {
+  //       std::string kdAsString(robot.btSerial.readStringUntil('\n').c_str());
+  //       kd = std::stof(kdAsString);
+  //       hasChanged = true;
+  //     }
+  //   }
+
+  //   robot.KP = kp;
+  //   robot.KD = kd;
+
+  //   // while (robot.checkForStartSignal()) {
+  //   //   delay(100);
+  //   // }
+
+  //   robot.btSerial.printf("Ready for next start! New kp: %f, New kd: %f\n", kp, kd);
+  // }
+
+
+
+
+
 
   // if (!robot.checkForStartSignal()) {
   //   return;

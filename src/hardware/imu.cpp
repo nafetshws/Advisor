@@ -2,7 +2,7 @@
 
 
 void initIMU(uint16_t CalSamples) {
-
+  isInitialized = false;
 
   Wire.begin();
   delay(200);
@@ -25,6 +25,8 @@ void initIMU(uint16_t CalSamples) {
 
   Serial.println("Gyro Calibrated");
   Serial.println(rateCalibrationYaw);
+
+  isInitialized = true;
 
 }
 
@@ -49,7 +51,8 @@ void readRawGyro() {
     GyroZ = Wire.read() << 8 | Wire.read();
 
     rateYaw = (float) GyroZ / 65.5; // Conversion of the values
-  
+
+    if (isInitialized) rateYaw -= rateCalibrationYaw; // Offset from the calibration
 }
 
 void setZeroAngle() {
@@ -57,19 +60,17 @@ void setZeroAngle() {
 }
 
 void calcGyro() {
-  
-  rateYaw -= rateCalibrationYaw; // Offset from the calibration
   currentTime = millis();
   deltaTime = (currentTime - previousTime) / 1000.0; // Get delta between last measurements,
                                                      //Convert milliseconds to seconds
   previousTime = currentTime;
-  if(rateYaw > 0.3 || rateYaw < -0.3) {  // Here a simple filter is used (may need testing)
+  if(rateYaw > 0.3 || rateYaw < -0.) {  // Here a simple filter is used (may need testing)
     angleYaw += rateYaw * deltaTime;    // Integrate to get the angle
   }
 
-  Serial.print(rateYaw);
-  Serial.print("\t");
-  Serial.println(angleYaw);
+  // Serial.print(rateYaw);
+  // Serial.print("\t");
+  // Serial.println(angleYaw);
 
 }
 
@@ -79,4 +80,12 @@ bool greaterThan (float degrees) {
 
 bool smallerThan(float degrees) {
     return angleYaw < degrees;
+}
+
+float getYawRate() {
+  return rateYaw;
+}
+
+float getYawAngle() {
+  return angleYaw;
 }

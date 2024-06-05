@@ -25,7 +25,7 @@ void Motor::initialise() {
 }
 
 
-void Motor::turnForward(uint8_t speed) {
+void Motor::turnForward(uint16_t speed) {
     // set direction forward
     digitalWrite(pinA, HIGH);
     digitalWrite(pinB, LOW);
@@ -36,7 +36,7 @@ void Motor::turnForward(uint8_t speed) {
 }
 
 
-void Motor::turnBackward(uint8_t speed) {
+void Motor::turnBackward(uint16_t speed) {
     // set direction backward
     digitalWrite(pinA, LOW);
     digitalWrite(pinB, HIGH);
@@ -46,7 +46,7 @@ void Motor::turnBackward(uint8_t speed) {
     this->speed = speed;
 }
 
-uint8_t Motor::getSpeed() {
+uint16_t Motor::getSpeed() {
     return this->speed;
 }
 

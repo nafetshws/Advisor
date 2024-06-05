@@ -40,7 +40,9 @@
 #define MAX_ERROR_THRESHOLD 100
 
 // TODO: Update correct value
-#define WHEEL_CIRCUMFERENCE (6.28f)
+#define WHEEL_CIRCUMFERENCE (12.56f)
+
+#define TURN_ENC_TICKS 51
 
 
 class Robot {
@@ -58,9 +60,9 @@ class Robot {
         IR irRight;
         
         uint16_t turnTime;
-        uint8_t turnSpeed;
-        uint8_t driveSpeed;
-        uint8_t maxDriveSpeed;
+        uint16_t turnSpeed;
+        uint16_t driveSpeed;
+        uint16_t maxDriveSpeed;
 
         uint16_t wallDistance;
         uint8_t cellWidth; //in mm
@@ -73,6 +75,9 @@ class Robot {
 
         // Bluetooth Serial
         BluetoothSerial btSerial;
+
+        // dt
+        unsigned long prevTime;
 
 
         Robot();
@@ -87,8 +92,10 @@ class Robot {
         void moveForwardUsingEncoders(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
-        void turnGyroLeft(float degrees = 0.0);
-        void turnGyroRight(float degrees = 0.0);
+        void turnGyroLeft(float degrees = 81.8);
+        void turnGyroRight(float degrees = 81.8);
+        void turnRightWithEncoders();
+        void turnLeftWithEncoders();
         ////////////////////////////////////////////
 
         void driveTillObstacle();

@@ -22,6 +22,8 @@ static float rateCalibrationYaw;
 static unsigned long int currentTime, previousTime;
 static double deltaTime;
 
+static bool isInitialized;
+
 
 
 /**
@@ -61,5 +63,9 @@ bool greaterThan(float degrees);
  * @brief Returns true if angle is smaller than degrees
 */
 bool smallerThan(float degrees);
+
+float getYawRate();
+
+float getYawAngle();
 
 #endif
