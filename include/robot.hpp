@@ -88,12 +88,12 @@ class Robot {
         bool wallRight();
         bool wallLeft();
 
-        void moveForward(int distance = 1);
+        void moveForwardUsingToF(int distance = 1);
         void moveForwardUsingEncoders(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
-        void turnGyroLeft(float degrees = 81.8);
-        void turnGyroRight(float degrees = 81.8);
+        void turnLeftWithGyro(float degrees = 81.8);
+        void turnRightWithGyro(float degrees = 81.8);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
         ////////////////////////////////////////////
