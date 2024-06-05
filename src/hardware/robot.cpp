@@ -42,25 +42,29 @@ void Robot::setupRobot() {
   motorRight.initialise();
   motorLeft.initialise();
   // Initialise the motor encoders pins and interrupts, init timer interrupt
-  initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
+  // initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
 
   Serial.println("SETUP: Motor initialised");
 
 
-  // SETUP TOF //////////////////////////////////
-  Serial.println("SETUP: Try to connect to TOF sensors...");
+  // // SETUP TOF //////////////////////////////////
+  // Serial.println("SETUP: Try to connect to TOF sensors...");
 
-  // init all the tof sensors
+  // // init all the tof sensors
 
-  initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
-  // initTofSensors(tofLeftFront, tofRightFront);;
-  // initTofSensors(tofLeft, tofRight);
+  // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
+  // // initTofSensors(tofLeftFront, tofRightFront);;
+  // // initTofSensors(tofLeft, tofRight);
 
-  Serial.println("SETUP: TOF Sensors initialised");
+  // Serial.println("SETUP: TOF Sensors initialised");
 
-  // SETUP DIP switches /////////////////////////
-  pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
-  pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
+  // // SETUP DIP switches /////////////////////////
+  // pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
+  // pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
+
+
+  // SETUP IMU //////////////////////////////////
+  initIMU(2000);
 
   // SETUP END //////////////////////////////////
   Serial.println("SETUP: Setup Done");
@@ -124,6 +128,36 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
   motorRight.stopMotor();
 
   if (!disableTurnErrorCorrection) this->correctTurnError();
+}
+
+void Robot::turnGyroRight (float degrees) {
+  setZeroAngle();         // Resets Angle
+
+  degrees *= -1.0;
+  
+  while(greaterThan(degrees)) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+  
+    motorRight.turnBackward(turnSpeed); // Turn Mouse
+    motorLeft.turnForward(turnSpeed);
+  
+    delay(2);
+  }
+}
+
+void Robot::turnGyroLeft (float degrees) {
+  setZeroAngle();         // Resets Angle
+  
+  while(smallerThan(degrees)) { 
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+
+    motorRight.turnForward(turnSpeed); // Turn Mouse
+    motorLeft.turnBackward(turnSpeed);
+  
+    delay(2);
+  }
 }
 
 void Robot::correctTurnError() {
