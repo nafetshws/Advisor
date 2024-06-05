@@ -287,3 +287,7 @@ int mod(int a, int b) {
     }
     return res;
 }
+
+int get_direction_last() {
+    return direction_last;
+}

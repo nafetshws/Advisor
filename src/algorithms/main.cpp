@@ -24,5 +24,5 @@ int main() {
         }
     }
 
-    floodfill(*Maze::endCell, direction_last);
+    floodfill(*Maze::endCell, get_direction_last());
 }
