@@ -17,6 +17,7 @@ Cell *Maze::endCell;
 std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
+int direction_last = 0;
 
 void Maze::initMaze()
 {
@@ -289,8 +290,4 @@ int mod(int a, int b) {
         res += b;
     }
     return res;
-}
-
-int get_direction_last() {
-    return direction_last;
 }
