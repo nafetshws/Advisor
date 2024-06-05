@@ -5,6 +5,7 @@
 #include "tof.hpp"
 #include "ir.hpp"
 #include "encoder.hpp"
+#include "servo.hpp"
 //#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
@@ -33,6 +34,12 @@
 // DIP Switches
 #define DIP_SWITCH_PIN_1 13
 #define DIP_SWITCH_PIN_2 12
+
+// SERVO Motor
+#define SERVO_PIN 23
+
+
+
 
 // Error bounds
 #define MIN_ERROR_THRESHOLD 10

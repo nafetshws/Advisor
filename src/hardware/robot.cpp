@@ -31,6 +31,11 @@ void Robot::setupRobot() {
   // btSerial.begin("BallE BluetoothTestInterface");
   Serial.println("\nSETUP: Serial Monitor running");
 
+  // SETUP SERVO MOTOR //////////////////////////
+  setupServo(SERVO_PIN);
+  delay(30);
+  Serial.println("SETUP: Servo initialised");
+
   // SETUP MOTORS ///////////////////////////////
 
   // Initialise the motor objects, start pwm channels, confiure pins
