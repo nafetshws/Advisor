@@ -39,16 +39,31 @@ void setup() {
 
 
 void loop() {
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    robot.driveTillObstacle();
 
-    printf("finished\n");
+  Serial.println("Start Left Turn");
+  robot.turnGyroLeft(90.0);
 
-    while (1) {
-      delay(100); 
-    }
-  }
+  Serial.println("Turn Finished");
+
+  delay(2000);
+  
+  Serial.println("Start Right Turn");
+  robot.turnGyroRight(90.0);
+
+  Serial.println("Turn Finished");
+  
+  delay(2000);
+
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   robot.driveTillObstacle();
+
+  //   printf("finished\n");
+
+  //   while (1) {
+  //     delay(100); 
+  //   }
+  // }
 
   // uint16_t leftFrontDistance = robot.tofLeftFront.getDist();
   // uint16_t rightFrontDistance = robot.tofRightFront.getDist();
