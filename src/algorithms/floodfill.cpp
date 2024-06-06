@@ -6,6 +6,8 @@
 #include "../../include/floodfill.hpp"
 #include "../../include/mms.hpp"
 
+#define VISITED_PATH_WEIGHT 1
+
 // static variables
 Cell Maze::maze[SIZE][SIZE];
 Cell *Maze::center1;
@@ -30,7 +32,7 @@ void Maze::initMaze()
         {
             Maze::get(x, y)->x = x;
             Maze::get(x, y)->y = y;
-            Maze::get(x, y)->dead = false;
+            Maze::get(x, y)->discovered = false;
 
             //set walls that surround the maze
             if(y == 0) {
@@ -88,6 +90,13 @@ void Maze::initMazeReverse()
             Maze::get(x, y)->distance = calculateManhattanDistance(*Maze::get(x, y), *center1);
         }
     }
+
+    for (auto cell : g.vertices)
+    {
+        cell->discovered = true;
+    }
+    Maze::get(0,0)->discovered = false; 
+
     // set start cell
     Maze::startCell = Maze::endCell;
 }
@@ -147,8 +156,8 @@ void floodfillHelper(Cell &c, int direction)
             //std::cerr << "Neighbor cell: (" << unsigned(neighbor->x) << ", " << unsigned(neighbor->y) << ")" << std::endl;
             if(!isOpenNeighbor(*current, *neighbor)) continue;
 
-            if(neighbor->distance < minMD) {
-                minMD = neighbor->distance;
+            if(neighbor->distance + (neighbor->discovered ? VISITED_PATH_WEIGHT : 0) < minMD) {
+                minMD = neighbor->distance + (neighbor->discovered ? VISITED_PATH_WEIGHT : 0);
                 //update the next cell only if the neighbors of the current cell, which the robot is in, are searched
                 if(current->x == c.x && current->y == c.y) {
                     nextCell = neighbor;

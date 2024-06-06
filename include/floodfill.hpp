@@ -30,7 +30,7 @@ struct Cell
     Cell() : x(0), y(0), distance(0), walls(0) {}
     Cell(uint8_t x, uint8_t y) : x(x), y(y), distance(0), walls(0) {}
 
-    bool dead;
+    bool discovered;
 
     bool hasNorthWall();
     bool hasEastWall();
