@@ -33,7 +33,7 @@ void Robot::setupRobot() {
 
   // SETUP SERVO MOTOR //////////////////////////
   setupServo(SERVO_PIN);
-  delay(30);
+  delay(100);
   Serial.println("SETUP: Servo initialised");
 
   // SETUP MOTORS ///////////////////////////////
