@@ -4,8 +4,9 @@
 #include <cstdint>
 
 // ESP PWM Channels
-#define MOTORA_PWM_CHANNEL 0
-#define MOTORB_PWM_CHANNEL 1
+// servo motor always use channel 1
+#define MOTORA_PWM_CHANNEL 2
+#define MOTORB_PWM_CHANNEL 3
 // ESP PWM Frequency 4kHz
 #define MOTOR_PWM_FREQUENCY 4000
 // ESP PWM RESOLUTION 8 Bit
