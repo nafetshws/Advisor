@@ -141,5 +141,6 @@ void setup() {
 
 
 void loop() {
-  driveClockwiseLoop();  
+  //driveClockwiseLoop();
+  robot.startFloodfill();
 }

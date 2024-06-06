@@ -3,6 +3,7 @@
 #include "../include/robot.hpp"
 #include "../include/encoder.hpp"
 #include "../include/imu.hpp"
+#include "../include/floodfill.hpp"
 
 Robot::Robot() {
   this->motorRight = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
@@ -373,4 +374,11 @@ void Robot::correctSteeringError() {
   this->motorLeft.turnForward(leftMotorSpeedPid);
   this->motorRight.turnForward(rightMotorSpeedPid);
   ////////////////////////////////////////////////////
+}
+
+void Robot::startFloodfill() {
+  Maze::initMaze();
+  Maze::attachRobot(this);
+  floodfill(*Maze::startCell);
+  Maze::dettachRobot();
 }

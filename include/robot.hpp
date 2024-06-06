@@ -103,6 +103,8 @@ class Robot {
         bool checkForTurnSignal();
         void correctTurnError();
         void correctSteeringError();
+
+        void startFloodfill();
 };
 
 #endif
