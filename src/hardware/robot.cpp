@@ -261,49 +261,52 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  this->btSerial.println("Front Wall");
+  //  this->btSerial.println("Front Wall");
+  bool hasWall;
+  /*   bool hasChanged = false;
+    while (!hasChanged) {
+      if (this->btSerial.available()) {
+        std::string s(btSerial.readStringUntil('\n').c_str());
+        hasWall = stoi(s);
+        hasChanged = true;
+      }
+    } */
 
-  bool hasChanged = false;
-  while (!hasChanged) {
-    if (this->btSerial.available()) {
-      this->btSerial.readStringUntil('\n');
-      hasChanged = true;
-    }
-  }
-
-  bool hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
   this->btSerial.printf("Front wall measured: %d\n", hasWall);
   return hasWall;
 }
 
 bool Robot::wallRight() {
-  this->btSerial.println("Right Wall");
+  //  this->btSerial.println("Right Wall");
+  bool hasWall;
+  /*   bool hasChanged = false;
+    while (!hasChanged) {
+      if (this->btSerial.available()) {
+        std::string s(btSerial.readStringUntil('\n').c_str());
+        hasWall = stoi(s);
+        hasChanged = true;
+      }
+    } */
 
-  bool hasChanged = false;
-  while (!hasChanged) {
-    if (this->btSerial.available()) {
-      this->btSerial.readStringUntil('\n');
-      hasChanged = true;
-    }
-  }
-
-  bool hasWall = tofRight.getDist() < this->wallDistance;
+  hasWall = tofRight.getDist() < this->wallDistance;
   this->btSerial.printf("Right wall measured: %d\n", hasWall);
   return hasWall;
 }
 
 bool Robot::wallLeft() {
-  this->btSerial.println("Left Wall");
-
-  bool hasChanged = false;
+// this->btSerial.println("Left Wall");
+bool hasWall;
+/*   bool hasChanged = false;
   while (!hasChanged) {
     if (this->btSerial.available()) {
-      this->btSerial.readStringUntil('\n');
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
       hasChanged = true;
     }
-  }
+  } */
 
-  bool hasWall = tofLeft.getDist() < this->wallDistance;
+  hasWall = tofLeft.getDist() < this->wallDistance;
   this->btSerial.printf("Left wall measured: %d\n", hasWall);
   return hasWall;
 }
@@ -364,11 +367,11 @@ void Robot::moveForwardUsingEncoders(int distance) {
            getEncRight() - startValueEncRight < motorRotationsNeeded);
 
   // Break over a time frame of 100 ms 
-  for (int i = 0; i < 5; i++) {
+/*   for (int i = 0; i < 5; i++) {
     motorLeft.turnForward(motorLeft.getSpeed()  - speedDelta);
     motorRight.turnForward(motorLeft.getSpeed() - speedDelta);
     delay(20);
-  }
+  } */
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
