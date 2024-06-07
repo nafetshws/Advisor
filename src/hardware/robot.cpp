@@ -16,7 +16,7 @@ Robot::Robot() {
   this->turnTime = 270;
   this->turnSpeed = 500;
   this->driveSpeed = 600;
-  this->wallDistance = 120;
+  this->wallDistance = 80;
   this->cellWidth = 160;
   this->tofTurnError = 10;
   this->maxDriveSpeed = 800;
@@ -47,18 +47,18 @@ void Robot::setupRobot() {
   Serial.println("SETUP: Motor initialised");
 
 
-  // // SETUP TOF //////////////////////////////////
-  // Serial.println("SETUP: Try to connect to TOF sensors...");
+   // SETUP TOF //////////////////////////////////
+   Serial.println("SETUP: Try to connect to TOF sensors...");
 
-  // // init all the tof sensors
+  // init all the tof sensors
 
   // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
-  // // initTofSensors(tofLeftFront, tofRightFront);;
-  // // initTofSensors(tofLeft, tofRight);
+  initTofSensors(tofLeftFront, tofRightFront);;
+  initTofSensors(tofLeft, tofRight);
 
-  // Serial.println("SETUP: TOF Sensors initialised");
+   Serial.println("SETUP: TOF Sensors initialised");
 
-  // // SETUP DIP switches /////////////////////////
+  // SETUP DIP switches /////////////////////////
   pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
   pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
 
@@ -261,15 +261,51 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  return tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  this->btSerial.println("Front Wall");
+
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      this->btSerial.readStringUntil('\n');
+      hasChanged = true;
+    }
+  }
+
+  bool hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 bool Robot::wallRight() {
-  return tofRight.getDist() < this->wallDistance;
+  this->btSerial.println("Right Wall");
+
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      this->btSerial.readStringUntil('\n');
+      hasChanged = true;
+    }
+  }
+
+  bool hasWall = tofRight.getDist() < this->wallDistance;
+  this->btSerial.printf("Right wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 bool Robot::wallLeft() {
-  return tofLeft.getDist() < this->wallDistance;
+  this->btSerial.println("Left Wall");
+
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      this->btSerial.readStringUntil('\n');
+      hasChanged = true;
+    }
+  }
+
+  bool hasWall = tofLeft.getDist() < this->wallDistance;
+  this->btSerial.printf("Left wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 /*************Deprecated**********+***/
@@ -336,6 +372,9 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
+  resetLeftEncoder();
+  resetRightEncoder();
 }
 
 void Robot::correctSteeringError() {
@@ -358,7 +397,7 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
   Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast

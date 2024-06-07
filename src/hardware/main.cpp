@@ -134,8 +134,6 @@ void setup() {
   robot.setupRobot();
   resetLeftEncoder();
   resetRightEncoder();
-  initIMU(2000);
-  delay(1000);
 }
 
 
@@ -143,4 +141,7 @@ void setup() {
 void loop() {
   //driveClockwiseLoop();
   robot.startFloodfill();
+  // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
+
+  delay(100);
 }

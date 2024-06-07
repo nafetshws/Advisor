@@ -304,6 +304,7 @@ int mod(int a, int b) {
 
 void Maze::attachRobot(Robot *r) {
     Maze::robot = r;
+    Maze::isRobotAttached = true;
 }
 
 void Maze::dettachRobot() {
