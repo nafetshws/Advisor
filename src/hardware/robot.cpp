@@ -3,6 +3,7 @@
 #include "../include/robot.hpp"
 #include "../include/encoder.hpp"
 #include "../include/imu.hpp"
+#include "../include/floodfill.hpp"
 
 Robot::Robot() {
   this->motorRight = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
@@ -15,14 +16,14 @@ Robot::Robot() {
   this->turnTime = 270;
   this->turnSpeed = 500;
   this->driveSpeed = 600;
-  this->wallDistance = 120;
+  this->wallDistance = 80;
   this->cellWidth = 160;
   this->tofTurnError = 10;
   this->maxDriveSpeed = 800;
 
   this->prevError = 0.0f;
   this->KP = 0.3f;
-  this->KD = 0.4f;
+  this->KD = 0.35f;
 
 }
 
@@ -51,18 +52,18 @@ void Robot::setupRobot() {
   Serial.println("SETUP: Motor initialised");
 
 
-  // // SETUP TOF //////////////////////////////////
-  // Serial.println("SETUP: Try to connect to TOF sensors...");
+   // SETUP TOF //////////////////////////////////
+   Serial.println("SETUP: Try to connect to TOF sensors...");
 
-  // // init all the tof sensors
+  // init all the tof sensors
 
   // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
-  // // initTofSensors(tofLeftFront, tofRightFront);;
-  // // initTofSensors(tofLeft, tofRight);
+  initTofSensors(tofLeftFront, tofRightFront);;
+  initTofSensors(tofLeft, tofRight);
 
-  // Serial.println("SETUP: TOF Sensors initialised");
+   Serial.println("SETUP: TOF Sensors initialised");
 
-  // // SETUP DIP switches /////////////////////////
+  // SETUP DIP switches /////////////////////////
   pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
   pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
 
@@ -191,6 +192,7 @@ void Robot::turnRightWithGyro(float degrees) {
 
   resetLeftEncoder();
   resetRightEncoder();
+  delay(1000);
 }
 
 void Robot::turnLeftWithGyro(float degrees) {
@@ -212,6 +214,7 @@ void Robot::turnLeftWithGyro(float degrees) {
   motorRight.stopMotor();
   resetLeftEncoder();
   resetRightEncoder();
+  delay(1000);
 }
 
 /*************Deprecated**********+***/
@@ -265,15 +268,58 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  return tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  this->btSerial.println("Front Wall");
+  bool hasWall;
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
+      hasChanged = true;
+    }
+  }
+
+  // hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  // hasWall = tofRightFront.getDist() < this->wallDistance;
+  // this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  // return hasWall;
+  // bool hasWall = irLeft.isTriggered() && irRight.isTriggered();
+  this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 bool Robot::wallRight() {
-  return tofRight.getDist() < this->wallDistance;
+   this->btSerial.println("Right Wall");
+  bool hasWall;
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
+      hasChanged = true;
+    }
+  }
+
+  // hasWall = tofRight.getDist() < this->wallDistance;
+  this->btSerial.printf("Right wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 bool Robot::wallLeft() {
-  return tofLeft.getDist() < this->wallDistance;
+this->btSerial.println("Left Wall");
+bool hasWall;
+bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
+      hasChanged = true;
+    }
+  }
+
+  // hasWall = tofLeft.getDist() < this->wallDistance;
+  this->btSerial.printf("Left wall measured: %d\n", hasWall);
+  return hasWall;
 }
 
 /*************Deprecated**********+***/
@@ -309,7 +355,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncRight = getEncRight();
 
   // TODO: update value for circumference
-  float wheelRotationsNeeded = (distance * 17) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 15) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
@@ -328,18 +374,24 @@ void Robot::moveForwardUsingEncoders(int distance) {
   // Move forward until distance is covered, while correcting the steering error
   do {
       this->correctSteeringError();
+      delay(5);
   } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
            getEncRight() - startValueEncRight < motorRotationsNeeded);
 
   // Break over a time frame of 100 ms 
-  for (int i = 0; i < 5; i++) {
+/*   for (int i = 0; i < 5; i++) {
     motorLeft.turnForward(motorLeft.getSpeed()  - speedDelta);
     motorRight.turnForward(motorLeft.getSpeed() - speedDelta);
     delay(20);
-  }
+  } */
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
+  resetLeftEncoder();
+  resetRightEncoder();
+
+  delay(1000);
 }
 
 void Robot::correctSteeringError() {
@@ -378,4 +430,11 @@ void Robot::correctSteeringError() {
   this->motorLeft.turnForward(leftMotorSpeedPid);
   this->motorRight.turnForward(rightMotorSpeedPid);
   ////////////////////////////////////////////////////
+}
+
+void Robot::startFloodfill() {
+  Maze::initMaze();
+  Maze::attachRobot(this);
+  floodfill(*Maze::startCell);
+  Maze::dettachRobot();
 }

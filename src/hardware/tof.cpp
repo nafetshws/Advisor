@@ -40,7 +40,8 @@ uint16_t TOF::getDist(bool useStoredDist) {
 
   // If measurment went wrong
   if (measure.RangeStatus == 4) return -1;
-
+  // Do out of Range check and set dist to max of 8000
+  if (measure.RangeMilliMeter > 60000) return 8000;
   // return the distance in mm
   distance = measure.RangeMilliMeter;
 

@@ -5,6 +5,9 @@
 #include <iostream>
 #include "../../include/floodfill.hpp"
 #include "../../include/mms.hpp"
+#define FLOODFILL_INCLUDE
+#include "../../include/robot.hpp"
+#undef FLOODFILL_INCLUDE
 
 // static variables
 Cell Maze::maze[SIZE][SIZE];
@@ -18,6 +21,8 @@ std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
 int direction_last = 0;
+Robot *Maze::robot;
+bool Maze::isRobotAttached = false;
 
 void Maze::initMaze()
 {
@@ -73,8 +78,7 @@ void Maze::initMaze()
     Maze::startCell = Maze::get(0, 0);
 }
 
-void Maze::initMazeReverse()
-{
+void Maze::initMazeReverse() {
     Maze::reverseMode = true;
     Maze::center1 = Maze::get(0, 0);
 
@@ -90,13 +94,11 @@ void Maze::initMazeReverse()
     Maze::startCell = Maze::endCell;
 }
 
-Cell *Maze::get(uint8_t x, uint8_t y)
-{
+Cell *Maze::get(uint8_t x, uint8_t y) {
     return &Maze::maze[y][x];
 }
 
-void floodfill(Cell &c, int direction)
-{
+void floodfill(Cell &c, int direction) {
     floodfillHelper(c, direction);
 }
 
@@ -110,12 +112,9 @@ void floodfillHelper(Cell &c, int direction)
         Maze::floodfillPath.push_back(&c);
     }
 
-    if (c.distance == 0)
-    {
+    if (c.distance == 0) {
         direction_last = direction;
         Maze::endCell = &c;
-        std::cerr << "direction:" << direction << " direction_last:" << direction_last << std::endl;
-
         return;
     }
 
@@ -181,19 +180,29 @@ void floodfillHelper(Cell &c, int direction)
     else direction = 3; //west
 
     //direction hasn't changed
-    if(priorDirection == direction) MMS::moveForward();
-    //180 degree turn
+    if(priorDirection == direction) {
+        // MMS::moveForward();
+        moveForward();
+    }
     else if(std::abs(priorDirection - direction) == 2) {
-        MMS::turnRight(); 
-        MMS::turnRight();
-        MMS::moveForward();
+        //180 degree turn
+        // MMS::turnRight(); 
+        // MMS::turnRight();
+        // MMS::moveForward();
+        turnRight(); 
+        turnRight();
+        moveForward();
     } else if((priorDirection + 1) % 4 == direction) {
-        MMS::turnRight();
-        MMS::moveForward();
+        // MMS::turnRight();
+        // MMS::moveForward();
+        turnRight();
+        moveForward();
     } 
     else {
-        MMS::turnLeft();
-        MMS::moveForward();
+        // MMS::turnLeft();
+        // MMS::moveForward();
+        turnLeft();
+        moveForward();
     } 
 
     // next cell location
@@ -201,17 +210,18 @@ void floodfillHelper(Cell &c, int direction)
 }
 
 void updateWalls(Cell& cell, int direction) {
-    if(MMS::wallFront()) {
+    // if(MMS::wallFront()) {
+    if(wallFront()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[direction]);
     }
 
-    if(MMS::wallRight()) {
+    if(wallRight()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[(direction + 1) % 4]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction + 1) % 4]);
     }
 
-    if(MMS::wallLeft()) {
+    if(wallLeft()) {
         int newDirection = mod(direction - 1, 4);
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[newDirection]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[newDirection]);
@@ -290,4 +300,66 @@ int mod(int a, int b) {
         res += b;
     }
     return res;
+}
+
+void Maze::attachRobot(Robot *r) {
+    Maze::robot = r;
+    Maze::isRobotAttached = true;
+}
+
+void Maze::dettachRobot() {
+    Maze::robot = NULL;
+    Maze::isRobotAttached = false;
+}
+
+bool Maze::getIsRobotAttached() {
+    return Maze::isRobotAttached;
+}
+
+// Movement functions of robot
+void turnRight() {
+    if (Maze::getIsRobotAttached()) {
+        Maze::robot->turnRightWithGyro();
+    } else {
+        MMS::turnRight();
+    }
+}
+
+void turnLeft() {
+    if (Maze::getIsRobotAttached()) {
+        Maze::robot->turnLeftWithGyro();
+    } else {
+        MMS::turnLeft();
+    }
+}
+
+void moveForward(int distance) {
+    if (Maze::getIsRobotAttached()) {
+        Maze::robot->moveForwardUsingEncoders(distance);
+    } else {
+        MMS::moveForward(distance);
+    }
+}
+
+bool wallFront() {
+    if (Maze::getIsRobotAttached()) {
+        return Maze::robot->wallFront(); 
+    } else {
+        return MMS::wallFront();
+    }
+}
+bool wallRight() {
+    if (Maze::getIsRobotAttached()) {
+        return Maze::robot->wallRight(); 
+    } else {
+        return MMS::wallRight();
+    }
+}
+
+bool wallLeft() {
+    if (Maze::getIsRobotAttached()) {
+        return Maze::robot->wallLeft(); 
+    } else {
+        return MMS::wallLeft();
+    }
 }

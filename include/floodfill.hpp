@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <vector>
+#include "./robot.hpp"
 
 /**
  * Represents a cell using only 4 bytes.
@@ -44,27 +45,33 @@ struct Cell
     void setWall(char direction);
 };
 
-struct Maze
-{
-public:
-    static Cell maze[SIZE][SIZE];
-    static std::vector<Cell*> floodfillPath;
-    static std::vector<Cell*> floodfillReversePath;
+struct Maze {
+    public:
+        static Cell maze[SIZE][SIZE];
+        static std::vector<Cell*> floodfillPath;
+        static std::vector<Cell*> floodfillReversePath;
 
-    static bool reverseMode;
+        static bool reverseMode;
 
-    static void initMaze();
-    static void initMazeReverse();
-    static Cell *get(uint8_t x, uint8_t y);
+        // Numbering based on quadrants of a Cartesian coordinate system
+        static Cell *center1;
+        static Cell *center2;
+        static Cell *center3;
+        static Cell *center4;
 
-    // Numbering based on quadrants of a Cartesian coordinate system
-    static Cell *center1;
-    static Cell *center2;
-    static Cell *center3;
-    static Cell *center4;
+        static Cell *startCell;
+        static Cell *endCell; // cell where the previous run has ended
 
-    static Cell *startCell;
-    static Cell *endCell; // cell where the previous run has ended
+        // Robot
+        static Robot *robot;
+        static bool isRobotAttached;
+
+        static void initMaze();
+        static void initMazeReverse();
+        static Cell *get(uint8_t x, uint8_t y);
+        static void attachRobot(Robot *r);
+        static void dettachRobot();
+        static bool getIsRobotAttached();
 };
 
 uint8_t calculateManhattanDistance(const Cell &cell1, const Cell &cell2);
@@ -73,5 +80,14 @@ void floodfillHelper(Cell &c, int direction);
 bool isOpenNeighbor(Cell &c, Cell &neighbor);
 void updateWalls(Cell &cell, int direction);
 int mod(int a, int b);
+
+// Movement functions of robot
+void turnRight();
+void turnLeft();
+void moveForward(int distance = 1);
+
+bool wallFront();
+bool wallRight();
+bool wallLeft();
 
 #endif
