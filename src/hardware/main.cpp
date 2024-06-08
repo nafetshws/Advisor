@@ -35,7 +35,10 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
+  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -140,8 +143,19 @@ void setup() {
 
 void loop() {
   //driveClockwiseLoop();
-  robot.startFloodfill();
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    // robot.driveTillObstacle();
+    robot.startFloodfill();
+
+    while (1) {delay(10);}
+  }
+
+  // robot.startFloodfill();
+
+
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
+  // testToFSensors();
 
   delay(100);
 }

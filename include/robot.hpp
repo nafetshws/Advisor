@@ -92,8 +92,8 @@ class Robot {
         void moveForwardUsingEncoders(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
-        void turnLeftWithGyro(float degrees = 81.8);
-        void turnRightWithGyro(float degrees = 81.8);
+        void turnLeftWithGyro(float degrees = 69);
+        void turnRightWithGyro(float degrees = 79);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
         ////////////////////////////////////////////

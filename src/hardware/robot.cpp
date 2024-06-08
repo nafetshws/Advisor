@@ -23,7 +23,7 @@ Robot::Robot() {
 
   this->prevError = 0.0f;
   this->KP = 0.3f;
-  this->KD = 0.4f;
+  this->KD = 0.35f;
 
 }
 
@@ -187,6 +187,7 @@ void Robot::turnRightWithGyro(float degrees) {
 
   resetLeftEncoder();
   resetRightEncoder();
+  delay(1000);
 }
 
 void Robot::turnLeftWithGyro(float degrees) {
@@ -208,6 +209,7 @@ void Robot::turnLeftWithGyro(float degrees) {
   motorRight.stopMotor();
   resetLeftEncoder();
   resetRightEncoder();
+  delay(1000);
 }
 
 /*************Deprecated**********+***/
@@ -261,52 +263,56 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  //  this->btSerial.println("Front Wall");
+  this->btSerial.println("Front Wall");
   bool hasWall;
-  /*   bool hasChanged = false;
-    while (!hasChanged) {
-      if (this->btSerial.available()) {
-        std::string s(btSerial.readStringUntil('\n').c_str());
-        hasWall = stoi(s);
-        hasChanged = true;
-      }
-    } */
-
-  hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
-  this->btSerial.printf("Front wall measured: %d\n", hasWall);
-  return hasWall;
-}
-
-bool Robot::wallRight() {
-  //  this->btSerial.println("Right Wall");
-  bool hasWall;
-  /*   bool hasChanged = false;
-    while (!hasChanged) {
-      if (this->btSerial.available()) {
-        std::string s(btSerial.readStringUntil('\n').c_str());
-        hasWall = stoi(s);
-        hasChanged = true;
-      }
-    } */
-
-  hasWall = tofRight.getDist() < this->wallDistance;
-  this->btSerial.printf("Right wall measured: %d\n", hasWall);
-  return hasWall;
-}
-
-bool Robot::wallLeft() {
-// this->btSerial.println("Left Wall");
-bool hasWall;
-/*   bool hasChanged = false;
+  bool hasChanged = false;
   while (!hasChanged) {
     if (this->btSerial.available()) {
       std::string s(btSerial.readStringUntil('\n').c_str());
       hasWall = stoi(s);
       hasChanged = true;
     }
-  } */
+  }
 
-  hasWall = tofLeft.getDist() < this->wallDistance;
+  // hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  // hasWall = tofRightFront.getDist() < this->wallDistance;
+  // this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  // return hasWall;
+  // bool hasWall = irLeft.isTriggered() && irRight.isTriggered();
+  this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  return hasWall;
+}
+
+bool Robot::wallRight() {
+   this->btSerial.println("Right Wall");
+  bool hasWall;
+  bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
+      hasChanged = true;
+    }
+  }
+
+  // hasWall = tofRight.getDist() < this->wallDistance;
+  this->btSerial.printf("Right wall measured: %d\n", hasWall);
+  return hasWall;
+}
+
+bool Robot::wallLeft() {
+this->btSerial.println("Left Wall");
+bool hasWall;
+bool hasChanged = false;
+  while (!hasChanged) {
+    if (this->btSerial.available()) {
+      std::string s(btSerial.readStringUntil('\n').c_str());
+      hasWall = stoi(s);
+      hasChanged = true;
+    }
+  }
+
+  // hasWall = tofLeft.getDist() < this->wallDistance;
   this->btSerial.printf("Left wall measured: %d\n", hasWall);
   return hasWall;
 }
@@ -344,7 +350,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncRight = getEncRight();
 
   // TODO: update value for circumference
-  float wheelRotationsNeeded = (distance * 17) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 15) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
@@ -363,6 +369,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   // Move forward until distance is covered, while correcting the steering error
   do {
       this->correctSteeringError();
+      delay(5);
   } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
            getEncRight() - startValueEncRight < motorRotationsNeeded);
 
@@ -378,6 +385,8 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   resetLeftEncoder();
   resetRightEncoder();
+
+  delay(1000);
 }
 
 void Robot::correctSteeringError() {
@@ -400,7 +409,7 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
   Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
