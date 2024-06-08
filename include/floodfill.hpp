@@ -17,6 +17,8 @@ static const int SIZE = 16;
 static const int MAX_PATH_LENGTH = SIZE * SIZE;
 static const char DIRECTIONS[4] = {'n', 'e', 's', 'w'};
 
+extern int direction_last;
+
 struct Cell
 {
     uint8_t x;
@@ -71,7 +73,5 @@ void floodfillHelper(Cell &c, int direction);
 bool isOpenNeighbor(Cell &c, Cell &neighbor);
 void updateWalls(Cell &cell, int direction);
 int mod(int a, int b);
-
-extern int direction_last;
 
 #endif

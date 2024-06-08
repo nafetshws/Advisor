@@ -17,8 +17,7 @@ Cell *Maze::endCell;
 std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
-
-int direction_last;
+int direction_last = 0;
 
 void Maze::initMaze()
 {
@@ -195,7 +194,9 @@ void floodfillHelper(Cell &c, int direction)
     else {
         MMS::turnLeft();
         MMS::moveForward();
-    }
+    } 
+
+    // next cell location
     floodfillHelper(*nextCell, direction);
 }
 

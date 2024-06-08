@@ -8,7 +8,7 @@
 #include "servo.hpp"
 #include "imu.hpp"
 
-//#include <BluetoothSerial.h>
+#include <BluetoothSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -47,6 +47,11 @@
 #define MIN_ERROR_THRESHOLD 10
 #define MAX_ERROR_THRESHOLD 100
 
+// TODO: Update correct value
+#define WHEEL_CIRCUMFERENCE (12.56f)
+
+#define TURN_ENC_TICKS 51
+
 
 class Robot {
     public:
@@ -63,9 +68,9 @@ class Robot {
         IR irRight;
         
         uint16_t turnTime;
-        uint8_t turnSpeed;
-        uint8_t driveSpeed;
-        uint8_t maxDriveSpeed;
+        uint16_t turnSpeed;
+        uint16_t driveSpeed;
+        uint16_t maxDriveSpeed;
 
         uint16_t wallDistance;
         uint8_t cellWidth; //in mm
@@ -73,10 +78,15 @@ class Robot {
 
         //PID
         int prevError;
-        // float prevTime;
+        float KP;
+        float KD;
 
         // Bluetooth Serial
-        //BluetoothSerial btSerial;
+        BluetoothSerial btSerial;
+
+        // dt
+        unsigned long prevTime;
+
 
         Robot();
         void setupRobot();
@@ -86,11 +96,14 @@ class Robot {
         bool wallRight();
         bool wallLeft();
 
-        void moveForward(int distance = 1);
+        void moveForwardUsingToF(int distance = 1);
+        void moveForwardUsingEncoders(int distance = 1);
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
-        void turnGyroLeft(float degrees = 0.0);
-        void turnGyroRight(float degrees = 0.0);
+        void turnLeftWithGyro(float degrees = 81.8);
+        void turnRightWithGyro(float degrees = 81.8);
+        void turnRightWithEncoders();
+        void turnLeftWithEncoders();
         ////////////////////////////////////////////
 
         void driveTillObstacle();

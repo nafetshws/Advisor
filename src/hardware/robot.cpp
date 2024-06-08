@@ -1,6 +1,8 @@
-#include "../include/robot.hpp"
-#include "BluetoothSerial.h"
 #include <cstdint>
+#include "BluetoothSerial.h"
+#include "../include/robot.hpp"
+#include "../include/encoder.hpp"
+#include "../include/imu.hpp"
 
 Robot::Robot() {
   this->motorRight = Motor(MOTORA_IN1, MOTORA_IN2, MOTORA_PWM, MOTORA_PWM_CHANNEL);
@@ -8,17 +10,19 @@ Robot::Robot() {
 
   // IR Sensor objects
   this->irLeft = IR (TOF1_SHT_PIN);
-  this->irRight = IR (TOF1_SHT_PIN);
+  this->irRight = IR (TOF2_SHT_PIN);
 
   this->turnTime = 270;
-  this->turnSpeed = 80;
-  this->driveSpeed = 60;
+  this->turnSpeed = 500;
+  this->driveSpeed = 600;
   this->wallDistance = 120;
   this->cellWidth = 160;
   this->tofTurnError = 10;
-  this->maxDriveSpeed = 100;
+  this->maxDriveSpeed = 800;
 
   this->prevError = 0.0f;
+  this->KP = 0.3f;
+  this->KD = 0.4f;
 
 }
 
@@ -28,7 +32,7 @@ void Robot::setupRobot() {
   // start serial monitor
   Serial.begin(115200);
   // start 
-  // btSerial.begin("BallE BluetoothTestInterface");
+  btSerial.begin("BallE BluetoothTestInterface");
   Serial.println("\nSETUP: Serial Monitor running");
 
   // SETUP SERVO MOTOR //////////////////////////
@@ -42,7 +46,7 @@ void Robot::setupRobot() {
   motorRight.initialise();
   motorLeft.initialise();
   // Initialise the motor encoders pins and interrupts, init timer interrupt
-  // initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
+  initEncoders(MOTORA_ENCODER1, MOTORA_ENCODER2, MOTORB_ENCODER1, MOTORB_ENCODER2);
 
   Serial.println("SETUP: Motor initialised");
 
@@ -59,8 +63,8 @@ void Robot::setupRobot() {
   // Serial.println("SETUP: TOF Sensors initialised");
 
   // // SETUP DIP switches /////////////////////////
-  // pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
-  // pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
+  pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
+  pinMode(DIP_SWITCH_PIN_2, INPUT_PULLUP);
 
 
   // SETUP IMU //////////////////////////////////
@@ -71,31 +75,59 @@ void Robot::setupRobot() {
 }
 
 void Robot::driveTillObstacle() {
-  uint16_t max_distance = 60;
-
-  uint16_t topLeftDistance  = this->tofLeftFront.getDist();
-  uint16_t topRightDistance = this->tofRightFront.getDist();
-  uint16_t irLeftDistance   = this->irLeft.isTriggered();
-  uint16_t irRightDistance  = this->irRight.isTriggered();
-
   motorRight.turnForward(driveSpeed);
   motorLeft.turnForward(driveSpeed);
-  
-  // Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
-
-  while (topLeftDistance > max_distance && topRightDistance > max_distance) {
-    topLeftDistance = tofLeftFront.getDist();
-    topRightDistance = tofRightFront.getDist();
-    irLeftDistance = irLeft.isTriggered();
-    irRightDistance = irRight.isTriggered();
-
+ 
+  while (!irLeft.isTriggered() && !irRight.isTriggered()) {
     this->correctSteeringError();
 
-    // Serial.printf("TOF top left: %d\t TOF top rigth: %d\n", topLeftDistance, topRightDistance);
+    delay(5);
   }
 
   motorRight.stopMotor();
   motorLeft.stopMotor();
+}
+
+void Robot::turnLeftWithEncoders() {
+  uint32_t startEncLeftValue = getEncLeft();
+  uint32_t startEncRightValue = getEncRight();
+
+  motorLeft.turnForward(turnSpeed);
+  motorRight.turnBackward(turnSpeed);
+
+  uint32_t currentEncLeft = startEncLeftValue;
+  uint32_t currentEncRight = startEncRightValue;
+
+  do {
+    if (startEncLeftValue + TURN_ENC_TICKS >= currentEncLeft) {
+      motorLeft.stopMotor();
+    }
+    if (startEncRightValue + TURN_ENC_TICKS >= currentEncRight) {
+      motorRight.stopMotor();
+    }
+  } while (startEncLeftValue  + TURN_ENC_TICKS < currentEncLeft ||
+           startEncRightValue + TURN_ENC_TICKS < currentEncRight);
+}
+
+void Robot::turnRightWithEncoders() {
+  uint32_t startEncLeftValue = getEncLeft();
+  uint32_t startEncRightValue = getEncRight();
+
+  motorLeft.turnBackward(turnSpeed);
+  motorRight.turnForward(turnSpeed);
+
+  uint32_t currentEncLeft = startEncLeftValue;
+  uint32_t currentEncRight = startEncRightValue;
+
+  do {
+    if (startEncLeftValue + TURN_ENC_TICKS >= currentEncLeft) {
+      motorLeft.stopMotor();
+    }
+    if (startEncRightValue + TURN_ENC_TICKS >= currentEncRight) {
+      motorRight.stopMotor();
+    }
+  } while (startEncLeftValue  + TURN_ENC_TICKS < currentEncLeft ||
+           startEncRightValue + TURN_ENC_TICKS < currentEncRight);
 }
 
 void Robot::turnRight(bool disableTurnErrorCorrection) {
@@ -130,12 +162,10 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
   if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
-void Robot::turnGyroRight (float degrees) {
+void Robot::turnRightWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
-  degrees *= -1.0;
-  
-  while(greaterThan(degrees)) {
+  while(smallerThan(degrees)) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
   
@@ -144,12 +174,31 @@ void Robot::turnGyroRight (float degrees) {
   
     delay(2);
   }
+
+  btSerial.printf("Turned %f degrees.\n", getYawAngle());
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+
+  for (int i = 0; i < 50; i++) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+
+    btSerial.printf("Turned final %f degrees.\n", getYawAngle());
+    delay(1);
+  }
+
+
+  resetLeftEncoder();
+  resetRightEncoder();
 }
 
-void Robot::turnGyroLeft (float degrees) {
+void Robot::turnLeftWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
+
+  degrees *= -1.0;
   
-  while(smallerThan(degrees)) { 
+  while(greaterThan(degrees)) { 
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
 
@@ -158,8 +207,14 @@ void Robot::turnGyroLeft (float degrees) {
   
     delay(2);
   }
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+  resetLeftEncoder();
+  resetRightEncoder();
 }
 
+/*************Deprecated**********+***/
 void Robot::correctTurnError() {
   uint16_t currentDistanceLeft;
   uint16_t currentDistanceRight;
@@ -190,6 +245,7 @@ void Robot::correctTurnError() {
 
   } while (abs(distanceDifference) >= tofTurnError);
 }
+/*********************************+***/
 
 bool Robot::checkForTurnSignal() {
   int switch1 = digitalRead(DIP_SWITCH_PIN_1) == 0 ? 1 : 0;
@@ -203,7 +259,7 @@ bool Robot::checkForStartSignal() {
   int switch1 = digitalRead(DIP_SWITCH_PIN_1) == 0 ? 1 : 0;
   int switch2 = digitalRead(DIP_SWITCH_PIN_2) == 0 ? 1 : 0;
 
-  //Serial.printf("DIP1: %d\t DIP2: %d\n", switch1, switch2);
+  // btSerial.printf("DIP1: %d\t DIP2: %d\n", switch1, switch2);
 
   return switch1 == HIGH && switch2 == HIGH; 
 }
@@ -220,7 +276,8 @@ bool Robot::wallLeft() {
   return tofLeft.getDist() < this->wallDistance;
 }
 
-void Robot::moveForward(int distance) {
+/*************Deprecated**********+***/
+void Robot::moveForwardUsingToF(int distance) {
   uint16_t startDistanceLeft = tofLeftFront.getDist();
   uint16_t startDistanceRight = tofRightFront.getDist();
   uint16_t startDistance = (startDistanceLeft + startDistanceRight) / 2;
@@ -244,49 +301,72 @@ void Robot::moveForward(int distance) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 }
+/*********************************+***/
 
-void Robot::correctSteeringError() {
-  uint16_t startTime = millis();
 
-  int error;
-  // float prevError = 0.00F;
-  // float prevIterm = 0;
-  const float kp  = 0.1; // Tune (Proportional Constant)
-  // const float ki = 1; // Tune (Integral Constant)
-  const float kd = 0; // Tune (Derivative Constant)
+void Robot::moveForwardUsingEncoders(int distance) {
+  uint32_t startValueEncLeft = getEncLeft();
+  uint32_t startValueEncRight = getEncRight();
 
-  uint16_t leftToFReading = this->tofLeft.getDist(); 
-  uint16_t rightToFReading = this->tofRight.getDist();
+  // TODO: update value for circumference
+  float wheelRotationsNeeded = (distance * 17) / WHEEL_CIRCUMFERENCE;
+  // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
+  float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
-  error = leftToFReading - rightToFReading;
+  // motorLeft.turnForward(this->driveSpeed);
+  // motorRight.turnForward(this->driveSpeed + 25);
 
-  // The measured distance of the tof sensors varies in short period of time
-  // between +/- 5 mm, Therefore we shouldn't correct the error if it's lower than
-  // this threshold
-  if (abs(error) < MIN_ERROR_THRESHOLD || abs(error) > MAX_ERROR_THRESHOLD) {
-      motorLeft.turnForward(this->driveSpeed);
-      motorRight.turnForward(this->driveSpeed);
-      return;
+  uint16_t speedDelta = this->driveSpeed / 5;
+
+  // Accelerate ofer a time frame of 100 ms to the desired speed
+  for (int i = 0; i < 5; i++) {
+    motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
+    motorRight.turnForward(motorRight.getSpeed() + speedDelta);
+    delay(20);
   }
 
-  uint16_t dt = millis() - startTime;
+  // Move forward until distance is covered, while correcting the steering error
+  do {
+      this->correctSteeringError();
+  } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
+           getEncRight() - startValueEncRight < motorRotationsNeeded);
+
+  // Break over a time frame of 100 ms 
+  for (int i = 0; i < 5; i++) {
+    motorLeft.turnForward(motorLeft.getSpeed()  - speedDelta);
+    motorRight.turnForward(motorLeft.getSpeed() - speedDelta);
+    delay(20);
+  }
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+}
+
+void Robot::correctSteeringError() {
+  // Simple PD algorithm that uses encoders and a gyro sensor to correct errors when driving straight
+
+  // Caluclate error reported by the encoders for the proportional term
+  int error = getEncLeft() - getEncRight();
 
   // Calculate Proportional Term
-  float proportional = kp * error;
-  // Calculate Derivative Term
-  float derivative = (kd*  (this->prevError - error) / dt);
+  float proportional = this->KP * error;
+  // Update gyro values
+  readRawGyro();
+  // Calculate Derivative Term - YawRate is given in degree/s (clockwise rotation: > 0, counter-clockwise < 0)
+  float derivative = this->KD * getYawRate(); 
 
-  this->prevError = error;
-
-  // float pidTerm = proportional + integral + derivative;
   float pidTerm = proportional + derivative;
 
-  Serial.printf("Error: %d\tmotor left: %d\tmotor righ: %d\tPidTerm: %f\n", error, motorLeft.getSpeed(), motorRight.getSpeed(), pidTerm);
+  // Calculate adjusted motor speeds
+  uint16_t leftMotorSpeedPid = this->motorLeft.getSpeed() - (int) pidTerm;
+  uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
-  uint8_t leftMotorSpeedPid = this->motorRight.getSpeed() - (uint8_t) pidTerm;
-  uint8_t rightMotorSpeedPid = this->motorLeft.getSpeed() + (uint8_t) pidTerm;
+  // Debug info
+  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
-  if (leftMotorSpeedPid > this->maxDriveSpeed) { // Tune
+  // Prevent PD from going too fast
+  if (leftMotorSpeedPid > this->maxDriveSpeed) { 
     leftMotorSpeedPid = this->maxDriveSpeed;
   }
   if (rightMotorSpeedPid > this->maxDriveSpeed)
@@ -294,9 +374,8 @@ void Robot::correctSteeringError() {
     rightMotorSpeedPid = this->maxDriveSpeed;
   }
 
-  // Returns the turnForward or turnBackward Speed for Motors ////////
+  // Sets each motor to the pd adjusted speed ////////
   this->motorLeft.turnForward(leftMotorSpeedPid);
   this->motorRight.turnForward(rightMotorSpeedPid);
-  ////////////////////////////////////////////////////////////////////
-
+  ////////////////////////////////////////////////////
 }

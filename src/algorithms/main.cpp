@@ -14,6 +14,7 @@ int main() {
     floodfill(*Maze::startCell);
 
     // std::cerr<<"lastdir: "<<direction_last<<std::endl;
+
     Maze::initMazeReverse();
 
     for (int y = 0; y < SIZE; y++)
