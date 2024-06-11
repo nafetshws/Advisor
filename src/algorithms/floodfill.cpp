@@ -233,15 +233,19 @@ void Cell::setWall(char direction) {
     switch(direction) {
         case 'n':
             Maze::get(this->x, this->y)->setNorthWall();
+            if(this->y<SIZE-1) Maze::get(this->x, this->y+1)->setSoutWall();
             break;
         case 'e':
             Maze::get(this->x, this->y)->setEastWall();
+            if(this->x<SIZE-1) Maze::get(this->x+1, this->y)->setWestWall();
             break;
         case 's':
             Maze::get(this->x, this->y)->setSoutWall();
+            if(this->y>0) Maze::get(this->x, this->y-1)->setNorthWall();
             break;
         case 'w':
             Maze::get(this->x, this->y)->setWestWall();
+            if(this->x>0) Maze::get(this->x-1, this->y)->setEastWall();
             break;
         default:
             break;
