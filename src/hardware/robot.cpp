@@ -56,12 +56,10 @@ void Robot::setupRobot() {
    Serial.println("SETUP: Try to connect to TOF sensors...");
 
   // init all the tof sensors
+  // first two vl53L0, last two vl6180
+  initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
 
-  // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
-  initTofSensors(tofLeftFront, tofRightFront);;
-  initTofSensors(tofLeft, tofRight);
-
-   Serial.println("SETUP: TOF Sensors initialised");
+  Serial.println("SETUP: TOF Sensors initialised");
 
   // SETUP DIP switches /////////////////////////
   pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);

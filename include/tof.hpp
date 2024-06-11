@@ -132,16 +132,6 @@ public:
 
 };
 
-
-/**
- * @brief   Starts the communiction with 2 tof sensor and sets
- *          the i2c address to the given value
- * @param   tof1 reference tof sensor 1
- * @param   tof2 reference tof sensor 2
-*/
-void initTofSensors(TOF &tof1, TOF &tof2);
-
-
 /**
  * @brief   Starts the communiction with 4 tof sensor and sets
  *          the i2c address to the given value
@@ -153,15 +143,6 @@ void initTofSensors(TOF &tof1, TOF &tof2);
 void initTofSensors(TOF &tof1, TOF &tof2, TOF &tof3, TOF &tof4);
 
 /**
- * @brief   Starts the communiction with 2 VL6180 tof sensor and sets
- *          the i2c address to the given value
- * @param   tof1 reference tof sensor 1
- * @param   tof2 reference tof sensor 2
-*/
-void initTofSensors(TOF_6180 &tof1, TOF_6180 &tof2);
-
-
-/**
  * @brief   Starts the communiction with 4 VL6180 tof sensor and sets
  *          the i2c address to the given value
  * @param   tof1 reference tof sensor 1
@@ -170,6 +151,16 @@ void initTofSensors(TOF_6180 &tof1, TOF_6180 &tof2);
  * @param   tof4 reference tof sensor 2
 */
 void initTofSensors(TOF_6180 &tof1, TOF_6180 &tof2, TOF_6180 &tof3, TOF_6180 &tof4);
+
+/**
+ * @brief   Starts the communiction with 2 old tof sensors and 2 VL6180 tof sensor and sets
+ *          the i2c address to the given value
+ * @param   tof1 reference vl53L0 sensor 1
+ * @param   tof2 reference vl53L0 sensor 2
+ * @param   tof3 reference vl6180 sensor 1
+ * @param   tof4 reference vl6180 sensor 2
+*/
+void initTofSensors(TOF &tof1, TOF &tof2, TOF_6180 &tof3, TOF_6180 &tof4);
 
 
 #endif
