@@ -22,11 +22,15 @@ void Graph::bfsInit()
 {
     for (auto edge : edges)
     {
-        graph[edge.first].push_back(edge.second);
-        graph[edge.second].push_back(edge.first);
+        std::vector<Cell*> a{};
+        for (auto cell : edge)
+            a.push_back(cell);
+        
+        graph[a[0]].insert(a[1]);
+        graph[a[1]].insert(a[0]);
     }
 
-    for (Cell *cell : vertices)
+    for (auto cell : vertices)
     {
         MMS::setColor((int)cell->x, (int)cell->y, 'c');
         dist[cell] = 1e9;
@@ -41,7 +45,7 @@ void Graph::print(Cell *S, Cell *D)
     Cell *currentNode = D;
     path.push_back(D);
 
-    while (currentNode != NULL)
+    while (par[currentNode] != nullptr)
     {
         path.push_back(par[currentNode]);
         currentNode = par[currentNode];
@@ -51,8 +55,6 @@ void Graph::print(Cell *S, Cell *D)
 
     for (auto cell : path)
     {
-        if (cell == NULL) break;
-
         std::cerr << ++pathIndex << ":\t(" << (int)cell->x << "," << (int)cell->y << ")" << std::endl;
         MMS::setColor((int)cell->x, (int)cell->y, 'b');
     }
@@ -66,7 +68,7 @@ void Graph::bfs(Cell *S)
 
     while (!q.empty())
     {
-        Cell *node = q.front();
+        auto node = q.front();
         // std::cerr << "ddd(" << (int)node->x << "," << (int)node->y << ")" << std::endl;
         q.pop();
 

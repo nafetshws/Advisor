@@ -70,8 +70,8 @@ struct Maze
 struct Graph 
 {
     std::set<Cell*> vertices;
-    std::set<std::pair<Cell*, Cell*>> edges;
-    std::map<Cell*, std::vector<Cell*>> graph;
+    std::set<std::set<Cell*>> edges;
+    std::map<Cell*, std::set<Cell*>> graph;
 
     std::map<Cell*, Cell*> par;
     std::map<Cell*, int> dist;

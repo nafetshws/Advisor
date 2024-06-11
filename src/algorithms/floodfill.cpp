@@ -314,5 +314,5 @@ void Graph::addVertex(Cell* c)
 
 void Graph::addEdge(Cell* a, Cell* b)
 {
-    edges.insert(std::make_pair(a,b));
+    edges.insert({a,b});
 };
