@@ -64,7 +64,7 @@ void calcGyro() {
   deltaTime = (currentTime - previousTime) / 1000.0; // Get delta between last measurements,
                                                      //Convert milliseconds to seconds
   previousTime = currentTime;
-  if(rateYaw > 0.3 || rateYaw < -0.) {  // Here a simple filter is used (may need testing)
+  if(rateYaw > 0.3 || rateYaw < -0.3) {  // Here a simple filter is used (may need testing)
     angleYaw += rateYaw * deltaTime;    // Integrate to get the angle
   }
 

@@ -88,6 +88,10 @@ class Robot {
         unsigned long prevTime;
 
 
+        float rightBrake;
+        float leftBrake;
+
+
         Robot();
         void setupRobot();
 
@@ -102,6 +106,8 @@ class Robot {
         void turnLeft(bool disableTurnErrorCorrection = false);
         void turnLeftWithGyro(float degrees = 69);
         void turnRightWithGyro(float degrees = 79);
+        float leftGyroHelper(float degrees = 0.0);
+        float rightGyroHelper(float degrees = 0.0);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
         ////////////////////////////////////////////
@@ -111,6 +117,8 @@ class Robot {
         bool checkForTurnSignal();
         void correctTurnError();
         void correctSteeringError();
+
+
 
         void startFloodfill();
 };
