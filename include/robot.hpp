@@ -106,6 +106,8 @@ class Robot {
         void turnLeft(bool disableTurnErrorCorrection = false);
         void turnLeftWithGyro(float degrees = 69);
         void turnRightWithGyro(float degrees = 79);
+        void turnLeftWithGyroErrorCorrection(float degrees = 90);
+        void turnRightWithGyroErrorCorrection(float degrees = 90);
         float leftGyroHelper(float degrees = 0.0);
         float rightGyroHelper(float degrees = 0.0);
         void turnRightWithEncoders();

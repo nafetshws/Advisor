@@ -171,7 +171,7 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
 }
 
 
-void Robot::turnRightWithGyro(float degrees) {
+void Robot::turnRightWithGyroErrorCorrection(float degrees) {
   byte turns = 0;
   float offset = degrees;
   
@@ -193,7 +193,62 @@ void Robot::turnRightWithGyro(float degrees) {
   resetRightEncoder();
 }
 
+void Robot::turnRightWithGyro(float degrees) {
+  setZeroAngle();         // Resets Angle
+
+  while(smallerThan(degrees)) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+  
+    motorRight.turnBackward(turnSpeed); // Turn Mouse
+    motorLeft.turnForward(turnSpeed);
+  
+    delay(2);
+  }
+
+  btSerial.printf("Turned %f degrees.\n", getYawAngle());
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+
+  for (int i = 0; i < 50; i++) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+
+    btSerial.printf("Turned final %f degrees.\n", getYawAngle());
+    delay(1);
+  }
+
+
+  resetLeftEncoder();
+  resetRightEncoder();
+  delay(1000);
+}
+
 void Robot::turnLeftWithGyro(float degrees) {
+  setZeroAngle();         // Resets Angle
+
+  degrees *= -1.0;
+  
+  while(greaterThan(degrees)) { 
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+
+    motorRight.turnForward(turnSpeed); // Turn Mouse
+    motorLeft.turnBackward(turnSpeed);
+  
+    delay(2);
+  }
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+  resetLeftEncoder();
+  resetRightEncoder();
+  delay(1000);
+}
+
+
+void Robot::turnLeftWithGyroErrorCorrection(float degrees) {
   byte turns = 0;
   float offset = -degrees;
   

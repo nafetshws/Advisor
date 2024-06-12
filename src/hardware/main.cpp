@@ -157,7 +157,7 @@ void loop() {
 
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
   //robot.btSerial.printf("%d \n", robot.tofLeft.getDist());
-  // robot.turnRightWithGyro(90.0);  // testToFSensors();
+  // robot.turnRightWithGyroErrorCorrection(90.0);  // testToFSensors();
 
   // delay(3000);
 
@@ -165,9 +165,9 @@ void loop() {
   testToFSensors();
 
   // Serial.println("Turn Right Now (90°)");
-  // robot.turnRightWithGyro(90.0);
+  // robot.turnRightWithGyroErrorCorrection(90.0);
   // delay(3000);
   // Serial.println("Turn Left Now (90°)");
-  // robot.turnLeftWithGyro(90.0);
+  // robot.turnLeftWithGyroErrorCorrection(90.0);
   // delay(3000);
 }
