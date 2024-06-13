@@ -36,9 +36,9 @@ void testToFSensors() {
   int averageRight = sumRight / counter;
 
   Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
-  robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  // Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -143,10 +143,29 @@ void setup() {
 
 
 void loop() {
+  testToFSensors();
+  // if (robot.checkForStartSignal()) {
+    // delay(startDelayTime);
+    // // robot.turnLeftWithGyro();
+    // robot.turnLeftWithGyroErrorCorrection(90);
+    // delay(2 * 1000);
+    // robot.turnRightWithGyroErrorCorrection(90);
+    // robot.turnRightWithGyro();
+    // delay(startDelayTime);
+    // robot.moveForwardUsingEncoders();
+    // robot.moveForwardUsingEncoders();
+    // robot.moveForwardUsingEncoders();
+  //   robot.driveTillObstacle();
+
+  //   while (1) {
+  //     delay(100);
+  //   }
+  // }
+
+
   //driveClockwiseLoop();
   // if (robot.checkForStartSignal()) {
   //   delay(startDelayTime);
-  //   // robot.driveTillObstacle();
   //   robot.startFloodfill();
 
   //   while (1) {delay(10);}
@@ -162,7 +181,7 @@ void loop() {
   // delay(3000);
 
 
-  testToFSensors();
+  // testToFSensors();
 
   // Serial.println("Turn Right Now (90°)");
   // robot.turnRightWithGyroErrorCorrection(90.0);

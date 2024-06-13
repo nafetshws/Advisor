@@ -14,7 +14,8 @@ Robot::Robot() {
   this->irRight = IR (TOF2_SHT_PIN);
 
   this->turnTime = 270;
-  this->turnSpeed = 500;
+  // this->turnSpeed = 500;
+  this->turnSpeed = 380;
   this->driveSpeed = 600;
   this->wallDistance = 80;
   this->cellWidth = 160;
@@ -23,7 +24,7 @@ Robot::Robot() {
 
   this->prevError = 0.0f;
   this->KP = 0.3f;
-  this->KD = 0.4f;
+  this->KD = 0.35f;
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
@@ -62,6 +63,8 @@ void Robot::setupRobot() {
 
   // init all the tof sensors
   // first two vl53L0, last two vl6180
+  // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
+
   initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
 
   // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
@@ -179,12 +182,14 @@ void Robot::turnRightWithGyroErrorCorrection(float degrees) {
   while(turns < 4) {
     if(offset > 0.0) {
       Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
       offset = rightGyroHelper(offset);
       turns ++;
     }
     else {
       offset *= -1.0;
       Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
       offset = leftGyroHelper(offset);
       turns ++;
     }
@@ -211,13 +216,21 @@ void Robot::turnRightWithGyro(float degrees) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
+  // for (int i = 0; i < 50; i++) {
+  //   readRawGyro();        // Get new Data
+  //   calcGyro();           // Calculate new Angle
+
+  //   btSerial.printf("Turned final %f degrees.\n", getYawAngle());
+  //   delay(1);
+  // }
+
   for (int i = 0; i < 50; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
-
-    btSerial.printf("Turned final %f degrees.\n", getYawAngle());
-    delay(1);
+    delay(2);
   }
+
+  btSerial.printf("Turned by: %f\n", angleYaw);
 
 
   resetLeftEncoder();
@@ -240,8 +253,18 @@ void Robot::turnLeftWithGyro(float degrees) {
     delay(2);
   }
 
+
+  for (int i = 0; i < 50; i++) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+    delay(2);
+  }
+
+  btSerial.printf("Turned by: %f\n", angleYaw);
+
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
   resetLeftEncoder();
   resetRightEncoder();
   delay(1000);
@@ -256,12 +279,14 @@ void Robot::turnLeftWithGyroErrorCorrection(float degrees) {
   while(turns < 4) {
     if(offset > 0.0) {
       Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
       offset = rightGyroHelper(offset);
-      turns ++;
+      turns++;
     }
     else {
       offset *= -1.0;
       Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
       offset = leftGyroHelper(offset);
       turns ++;
     }
@@ -272,23 +297,23 @@ void Robot::turnLeftWithGyroErrorCorrection(float degrees) {
 
 float Robot::rightGyroHelper(float degrees)
 {
-
   setZeroAngle();
-  if (degrees < 2.0)
-  {
+
+  if (degrees < 1.5) {
     return degrees;
   }
 
-  while (getYawAngle() < (degrees - degrees * rightBrake))
-  {
+  while (getYawAngle() < (degrees - degrees * rightBrake)) {
     // Serial.printf("Turning right \t %f \n", getYawAngle());
     readRawGyro();                      // Get new Data
     calcGyro();                         // Calculate new Angle
     motorRight.turnBackward(turnSpeed); // Turn Mouse
     motorLeft.turnForward(turnSpeed);
   }
+
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
   readRawGyro(); // Get new Data
   calcGyro();    // Calculate new Angle
 
@@ -321,7 +346,7 @@ float Robot::rightGyroHelper(float degrees)
 float Robot::leftGyroHelper(float degrees) {
   
   setZeroAngle();
-  if(degrees < 2.0) {
+  if(degrees < 1.5) {
     return degrees;
   }
 
@@ -535,10 +560,71 @@ void Robot::moveForwardUsingEncoders(int distance) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  resetLeftEncoder();
-  resetRightEncoder();
+  // Use left and right TOF to correct error
+  cellCorrectionWithToF();
+
+  // resetLeftEncoder();
+  // resetRightEncoder();
 
   delay(1000);
+}
+
+void Robot::cellCorrectionWithToF() {
+  uint16_t maxWallDistance = 180;
+  uint16_t leftDistance = tofLeft.getDist();
+  uint16_t rightDistance = tofRight.getDist();
+
+  int16_t difference = leftDistance - rightDistance; 
+
+  // There is no wall on the left
+  if (leftDistance > maxWallDistance) {
+    return;
+  }
+
+  // There is no wall on the right
+  if (rightDistance > maxWallDistance) {
+    return;
+  }
+
+  // Abbort if robot is deviated too much from the middle 
+  if (abs(difference) > 80) {
+    btSerial.printf("Warning: Can't correct using ToF\n");
+    Serial.printf("Warning: Can't correct using ToF\n");
+    return;
+  } else if (abs(difference) < 8) {
+    // ToF Sensor isn't precise enough to correct
+    return;
+  }
+
+  for (int i = 0; i < 3; i++) {
+    // If the difference is positive, turn left else right
+    if (difference > 0) {
+      motorLeft.turnBackward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    } else {
+      motorRight.turnBackward(turnSpeed);
+      motorLeft.turnForward(turnSpeed);
+    }
+
+    float TURN_CORRECTION_CONSTANT = 4000;
+
+    btSerial.printf("Turning for %f seconds. Difference: %d\n", difference * TURN_CORRECTION_CONSTANT, difference);
+
+    unsigned long startTime = micros();
+
+    while (micros() - startTime < difference * TURN_CORRECTION_CONSTANT) {
+    
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    delay(1000);
+    difference = tofLeft.getDist() - tofRight.getDist();
+  }
+
+  resetLeftEncoder();
+  resetRightEncoder();
 }
 
 void Robot::correctSteeringError() {
@@ -561,7 +647,7 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
   Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
