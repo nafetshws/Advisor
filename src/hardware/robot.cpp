@@ -23,7 +23,10 @@ Robot::Robot() {
 
   this->prevError = 0.0f;
   this->KP = 0.3f;
-  this->KD = 0.35f;
+  this->KD = 0.4f;
+  
+  this->rightBrake = 0.1;
+  this->leftBrake = 0.1;
 
 }
 
@@ -55,11 +58,17 @@ void Robot::setupRobot() {
    // SETUP TOF //////////////////////////////////
    Serial.println("SETUP: Try to connect to TOF sensors...");
 
+  Wire.begin();
+
   // init all the tof sensors
   // first two vl53L0, last two vl6180
   initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
 
-  Serial.println("SETUP: TOF Sensors initialised");
+  // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
+  // initTofSensors(tofLeftFront, tofRightFront);;
+  // initTofSensors(tofLeft, tofRight);
+
+   Serial.println("SETUP: TOF Sensors initialised");
 
   // SETUP DIP switches /////////////////////////
   pinMode(DIP_SWITCH_PIN_1, INPUT_PULLUP);
@@ -161,6 +170,29 @@ void Robot::turnLeft(bool disableTurnErrorCorrection) {
   if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
+
+void Robot::turnRightWithGyroErrorCorrection(float degrees) {
+  byte turns = 0;
+  float offset = degrees;
+  
+  
+  while(turns < 4) {
+    if(offset > 0.0) {
+      Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      offset = rightGyroHelper(offset);
+      turns ++;
+    }
+    else {
+      offset *= -1.0;
+      Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      offset = leftGyroHelper(offset);
+      turns ++;
+    }
+  }
+  resetLeftEncoder();
+  resetRightEncoder();
+}
+
 void Robot::turnRightWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
@@ -214,6 +246,123 @@ void Robot::turnLeftWithGyro(float degrees) {
   resetRightEncoder();
   delay(1000);
 }
+
+
+void Robot::turnLeftWithGyroErrorCorrection(float degrees) {
+  byte turns = 0;
+  float offset = -degrees;
+  
+  
+  while(turns < 4) {
+    if(offset > 0.0) {
+      Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      offset = rightGyroHelper(offset);
+      turns ++;
+    }
+    else {
+      offset *= -1.0;
+      Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      offset = leftGyroHelper(offset);
+      turns ++;
+    }
+  }
+  resetLeftEncoder();
+  resetRightEncoder();
+}
+
+float Robot::rightGyroHelper(float degrees)
+{
+
+  setZeroAngle();
+  if (degrees < 2.0)
+  {
+    return degrees;
+  }
+
+  while (getYawAngle() < (degrees - degrees * rightBrake))
+  {
+    // Serial.printf("Turning right \t %f \n", getYawAngle());
+    readRawGyro();                      // Get new Data
+    calcGyro();                         // Calculate new Angle
+    motorRight.turnBackward(turnSpeed); // Turn Mouse
+    motorLeft.turnForward(turnSpeed);
+  }
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+  readRawGyro(); // Get new Data
+  calcGyro();    // Calculate new Angle
+
+  Serial.println("Stopped the motors. Still Calculating Angle for a sec");
+  for (int i = 0; i < 100; i++)
+  {
+    readRawGyro(); // Get new Data
+    calcGyro();    // Calculate new Angle
+    delay(3);
+  }
+
+  Serial.printf("Final Turn: %f degrees.\n", getYawAngle());
+
+  if (abs(getYawAngle() - degrees) > 1.0)
+  {
+    float temp = getYawAngle() - degrees;
+    if(temp > 0.0) {
+      rightBrake += 0.02;
+    }
+    else {
+      rightBrake -= 0.02;
+    }
+
+    Serial.printf("Right Brake value changed to %f. \n", rightBrake);
+  }
+
+  return degrees - getYawAngle();
+}
+
+float Robot::leftGyroHelper(float degrees) {
+  
+  setZeroAngle();
+  if(degrees < 2.0) {
+    return degrees;
+  }
+
+  while(getYawAngle() > (-degrees + degrees * leftBrake)) {
+    //  Serial.printf("Turning Left \t %f \n", getYawAngle());
+        readRawGyro();        // Get new Data
+        calcGyro();           // Calculate new Angle
+        motorRight.turnForward(turnSpeed); // Turn Mouse
+        motorLeft.turnBackward(turnSpeed);
+      }
+      motorLeft.stopMotor();
+      motorRight.stopMotor();
+      readRawGyro();        // Get new Data
+      calcGyro();           // Calculate new Angle
+          
+      Serial.println("Stopped the motors. Still Calculating Angle for a sec");
+      for(int i = 0; i < 100; i++) {
+        readRawGyro();        // Get new Data
+        calcGyro();           // Calculate new Angle
+        delay(3);
+      }
+
+      Serial.printf("Final Turn: %f degrees.\n", getYawAngle());
+
+      if(abs((-getYawAngle()) - degrees) > 1.0) {
+        float temp = getYawAngle() + degrees;
+        if((-getYawAngle()) - degrees > 0.0) {
+          leftBrake += 0.02;
+        }
+        else {
+          leftBrake -= 0.02;
+        }
+        Serial.printf("Left Brake value changed to %f. \n", leftBrake);
+      }
+
+  return (-getYawAngle()) - degrees;
+  
+
+}
+
+
 
 /*************Deprecated**********+***/
 void Robot::correctTurnError() {

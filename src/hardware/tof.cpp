@@ -12,6 +12,7 @@ TOF::TOF(uint8_t id, uint8_t address, uint8_t shutdownPin) {
   this->shutdownPin = shutdownPin;
 
   pinMode(shutdownPin, OUTPUT);
+  digitalWrite(shutdownPin, LOW);
 }
 
 
@@ -81,6 +82,7 @@ TOF_6180::TOF_6180(uint8_t id, uint8_t address, uint8_t shutdownPin) {
   this->shutdownPin = shutdownPin;
 
   pinMode(shutdownPin, OUTPUT);
+  digitalWrite(shutdownPin, LOW);
 }
 
 
@@ -90,6 +92,7 @@ void TOF_6180::enable(bool enable) {
 
 
 bool TOF_6180::begin() {
+  i2CScanner();
   // initing the i2c communication with the right address
   if(!sensor_obj.begin()) {
     // Communication faild to establish
@@ -99,6 +102,7 @@ bool TOF_6180::begin() {
   }
   // set address
   sensor_obj.setAddress(this->address);
+  Serial.printf("Set to adress 0x%02X \n", this->address);
   delay(10);
 
   if (this->address != sensor_obj.getAddress()) {
@@ -254,19 +258,21 @@ void initTofSensors(TOF &tof1, TOF &tof2, TOF_6180 &tof3, TOF_6180 &tof4) {
   tof4.enable(false);
   delay(10);
 
+  i2CScanner();
+
   // unreset all sensors
-  tof1.enable(true);
-  tof2.enable(true);
-  tof3.enable(true);
-  tof4.enable(true);
-  delay(10);
+  // tof1.enable(true);
+  // tof2.enable(true);
+  // tof3.enable(true);
+  // tof4.enable(true);
+  // delay(10);
 
   // reset all sensors again
-  tof1.enable(false);
-  tof2.enable(false);
-  tof3.enable(false);
-  tof4.enable(false);
-  delay(10);
+  // tof1.enable(false);
+  // tof2.enable(false);
+  // tof3.enable(false);
+  // tof4.enable(false);
+  // delay(10);
   
   // only enable one at a time to set the address
   
@@ -275,19 +281,50 @@ void initTofSensors(TOF &tof1, TOF &tof2, TOF_6180 &tof3, TOF_6180 &tof4) {
   tof1.begin();
   delay(10);
 
+  i2CScanner();
+
   // tof 2
   tof2.enable(true);
   tof2.begin();
   delay(10);
+
+  i2CScanner();
 
   // tof 3
   tof3.enable(true);
   tof3.begin();
   delay(10);
 
+  i2CScanner();
+
   // tof 4
   tof4.enable(true);
   tof4.begin();
   delay(10);
+
+  i2CScanner();
+
 }
 
+void i2CScanner() {
+  byte error, address;
+  int nDevices = 0;
+
+  Serial.println("Scanning for I2C devices ...");
+  for(address = 0x01; address < 0x7f; address++){
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+    if (error == 0){
+      Serial.printf("I2C device found at address 0x%02X\n", address);
+      if(address == 0x29) {
+        Serial.printf("Device found at Library object adress, thats great. \n");
+      }
+      nDevices++;
+    } else if(error != 2){
+      Serial.printf("Error %d at address 0x%02X\n", error, address);
+    }
+  }
+  if (nDevices == 0){
+    Serial.println("No I2C devices found");
+  }
+}

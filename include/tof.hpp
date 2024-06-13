@@ -7,7 +7,7 @@
 #include <cstdint>
 
 // I2C starting dddress of Sensors in hex
-#define TOF_START_ADDR 0x30
+#define TOF_START_ADDR 0x40
 
 // Error Offsets
 // #define TOF_LEFT_FRONT_OFFSET 8 
@@ -161,6 +161,12 @@ void initTofSensors(TOF_6180 &tof1, TOF_6180 &tof2, TOF_6180 &tof3, TOF_6180 &to
  * @param   tof4 reference vl6180 sensor 2
 */
 void initTofSensors(TOF &tof1, TOF &tof2, TOF_6180 &tof3, TOF_6180 &tof4);
+
+
+/**
+ * @brief   Prints all connected devices to the I2C Bus
+ */
+void i2CScanner();
 
 
 #endif

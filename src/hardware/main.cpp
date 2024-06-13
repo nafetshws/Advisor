@@ -137,25 +137,37 @@ void setup() {
   robot.setupRobot();
   resetLeftEncoder();
   resetRightEncoder();
+  robot.btSerial.printf("SETUP\n");
 }
 
 
 
 void loop() {
   //driveClockwiseLoop();
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    // robot.driveTillObstacle();
-    robot.startFloodfill();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   // robot.driveTillObstacle();
+  //   robot.startFloodfill();
 
-    while (1) {delay(10);}
-  }
+  //   while (1) {delay(10);}
+  // }
 
   // robot.startFloodfill();
 
 
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
-  // testToFSensors();
+  //robot.btSerial.printf("%d \n", robot.tofLeft.getDist());
+  // robot.turnRightWithGyroErrorCorrection(90.0);  // testToFSensors();
 
-  delay(100);
+  // delay(3000);
+
+
+  testToFSensors();
+
+  // Serial.println("Turn Right Now (90°)");
+  // robot.turnRightWithGyroErrorCorrection(90.0);
+  // delay(3000);
+  // Serial.println("Turn Left Now (90°)");
+  // robot.turnLeftWithGyroErrorCorrection(90.0);
+  // delay(3000);
 }
