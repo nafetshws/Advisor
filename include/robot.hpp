@@ -103,6 +103,7 @@ class Robot {
         void moveForwardUsingToF(int distance = 1);
         void moveForwardUsingEncoders(int distance = 1);
         void cellCorrectionWithToF(); 
+        void correctWithFrontWall(); 
         void turnRight(bool disableTurnErrorCorrection = false);
         void turnLeft(bool disableTurnErrorCorrection = false);
         // void turnLeftWithGyro(float degrees = 69);
@@ -122,6 +123,8 @@ class Robot {
         bool checkForTurnSignal();
         void correctTurnError();
         void correctSteeringError();
+
+        int16_t calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples = 3);
 
 
 

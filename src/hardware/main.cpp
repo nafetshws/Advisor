@@ -35,8 +35,8 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
-  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  // Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
@@ -53,7 +53,9 @@ void driveClockwiseLoop() {
     delay(delayTime);
     robot.driveTillObstacle();
     delay(delayTime);
-    robot.turnRightWithGyro();
+    robot.correctWithFrontWall();
+    delay(delayTime);
+    robot.turnRightWithGyroErrorCorrection(90);
   }
 }
 
@@ -143,7 +145,21 @@ void setup() {
 
 
 void loop() {
-  testToFSensors();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   robot.driveTillObstacle();
+  //   delay(delayTime);
+  //   robot.correctWithFrontWall();
+
+  //   while (1) {}
+  // }
+
+
+  driveClockwiseLoop();
+  // testGyroData();
+
+  // testToFSensors();
+
   // if (robot.checkForStartSignal()) {
     // delay(startDelayTime);
     // // robot.turnLeftWithGyro();
