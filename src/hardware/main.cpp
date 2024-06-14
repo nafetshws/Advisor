@@ -156,6 +156,14 @@ void loop() {
 
 
   driveClockwiseLoop();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   robot.correctWithFrontWall();
+
+  //   while (robot.checkForStartSignal()) {
+  //     delay(100);
+  //   }
+  // }
   // testGyroData();
 
   // testToFSensors();

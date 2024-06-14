@@ -15,7 +15,7 @@ Robot::Robot() {
 
   this->turnTime = 270;
   // this->turnSpeed = 500;
-  this->turnSpeed = 450;
+  this->turnSpeed = 550;
   this->driveSpeed = 450;
   this->wallDistance = 80;
   this->cellWidth = 160;
@@ -304,7 +304,7 @@ float Robot::rightGyroHelper(float degrees)
   }
 
   while (getYawAngle() < (degrees - degrees * rightBrake)) {
-    btSerial.printf("Turning right: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
+    // btSerial.printf("Turning right: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
     readRawGyro();                      // Get new Data
     calcGyro();                         // Calculate new Angle
     motorRight.turnBackward(turnSpeed); // Turn Mouse
@@ -351,7 +351,7 @@ float Robot::leftGyroHelper(float degrees) {
   }
 
   while(getYawAngle() > (-degrees + degrees * leftBrake)) {
-     btSerial.printf("Turning Left: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
+    //  btSerial.printf("Turning Left: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
         readRawGyro();        // Get new Data
         calcGyro();           // Calculate new Angle
         motorRight.turnForward(turnSpeed); // Turn Mouse
@@ -644,6 +644,7 @@ int16_t Robot::calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples
   return leftFrontDistance - rightFrontDistance;
 }
 
+/*
 void Robot::correctWithFrontWall() {
   float TURN_CORRECTION_CONSTANT = 0.6;
 
@@ -682,6 +683,73 @@ void Robot::correctWithFrontWall() {
     motorRight.stopMotor();
 
     delay(200);
+    // difference = tofLeft.getDist() - tofRight.getDist();
+    difference = this->calcAverageDifference(tofLeftFront, tofRightFront); 
+  }
+*/
+void Robot::correctWithFrontWall() {
+  float TURN_CORRECTION_CONSTANT = 0.9;
+
+  int16_t difference = this->calcAverageDifference(tofLeftFront, tofRightFront); 
+
+  btSerial.printf("Turning for %f ms. Difference: %d\n", difference * TURN_CORRECTION_CONSTANT, difference);
+
+  for (int i = 0; i < 1000; i++) {
+    // Abbort correction if the margin of error is too small 
+    if (abs(difference) <= 2) {
+      return;
+    } else if (abs(difference) < 20) {
+        btSerial.printf("Starting fine adjustement\n");
+
+        while (abs(difference) > 2) {
+        // while (abs(this->calcAverageDifference(tofLeftFront, tofRightFront, 2)) > 3) {
+          btSerial.printf("Difference: %d\n", difference);
+          unsigned long startTime = micros();
+
+          // If the difference is negative, turn left else right
+          if (difference < 0) {
+            motorLeft.turnBackward(turnSpeed);
+            motorRight.turnForward(turnSpeed);
+          } else {
+            motorRight.turnBackward(turnSpeed);
+            motorLeft.turnForward(turnSpeed);
+          }
+
+          while (micros() - startTime < 30 * 1e3) {
+            
+          }
+
+          motorLeft.stopMotor();
+          motorRight.stopMotor();
+
+          difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+        }
+      return;
+    } 
+
+    // If the difference is negative, turn left else right
+    if (difference < 0) {
+      btSerial.printf("Turning left\n");
+      motorLeft.turnBackward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    } else {
+      btSerial.printf("Turning right\n");
+      motorRight.turnBackward(turnSpeed);
+      motorLeft.turnForward(turnSpeed);
+    }
+
+    btSerial.printf("Turning for %f ms. Difference: %d\n", difference * TURN_CORRECTION_CONSTANT, difference);
+
+    // unsigned long startTime = micros();
+    uint16_t startTime = millis();
+
+    while (millis() - startTime < abs(difference) * TURN_CORRECTION_CONSTANT) {
+      // btSerial.printf("Waiting\n");
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
     // difference = tofLeft.getDist() - tofRight.getDist();
     difference = this->calcAverageDifference(tofLeftFront, tofRightFront); 
   }
