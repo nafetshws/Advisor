@@ -116,6 +116,7 @@ class Robot {
         float rightGyroHelper(float degrees = 0.0);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
+
         ////////////////////////////////////////////
 
         void driveTillObstacle();
@@ -124,11 +125,15 @@ class Robot {
         void correctTurnError();
         void correctSteeringError();
 
+        void smallAdjustmentGyro(float degrees, bool turnLeft);
+        void tl(float degrees = 90);
+        void tr(float degress = 90);
+
         int16_t calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples = 3);
 
-
-
         void startFloodfill();
+
+        void ballPickUp();
 };
 
 #endif

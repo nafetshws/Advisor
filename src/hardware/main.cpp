@@ -55,7 +55,8 @@ void driveClockwiseLoop() {
     delay(delayTime);
     robot.correctWithFrontWall();
     delay(delayTime);
-    robot.turnRightWithGyroErrorCorrection(90);
+    // robot.turnRightWithGyroErrorCorrection(90);
+    robot.tr(90);
   }
 }
 
@@ -154,8 +155,22 @@ void loop() {
   //   while (1) {}
   // }
 
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    robot.ballPickUp();
+    // servoDown();
+    // delay(startDelayTime);
+    // servoUp();
 
-  driveClockwiseLoop();
+    while (1) {
+
+    }
+    // robot.tl(45);
+    // delay(delayTime);
+  }
+
+
+  // driveClockwiseLoop();
   // if (robot.checkForStartSignal()) {
   //   delay(startDelayTime);
   //   robot.correctWithFrontWall();
