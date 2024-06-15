@@ -57,8 +57,6 @@ class Robot {
         Motor motorLeft;
 
         // TOF Sensor Objects (MUST be constructed Robot.hpp, OTHERWISE ESP32 CRASHES)
-        // TOF tofLeftFront =    TOF(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
-        // TOF tofRightFront =   TOF(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
         TOF_6180 tofLeftFront =    TOF_6180(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
         TOF_6180 tofRightFront =   TOF_6180(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
         TOF_6180 tofLeft  =   TOF_6180(3, TOF_START_ADDR + 3, TOF5_SHT_PIN);

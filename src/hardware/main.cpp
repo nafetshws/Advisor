@@ -146,86 +146,11 @@ void setup() {
 
 
 void loop() {
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-  //   robot.driveTillObstacle();
-  //   delay(delayTime);
-  //   robot.correctWithFrontWall();
-
-  //   while (1) {}
-  // }
-
   if (robot.checkForStartSignal()) {
     delay(startDelayTime);
     robot.ballPickUp();
-    // servoDown();
-    // delay(startDelayTime);
-    // servoUp();
-
     while (1) {
 
     }
-    // robot.tl(45);
-    // delay(delayTime);
   }
-
-
-  // driveClockwiseLoop();
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-  //   robot.correctWithFrontWall();
-
-  //   while (robot.checkForStartSignal()) {
-  //     delay(100);
-  //   }
-  // }
-  // testGyroData();
-
-  // testToFSensors();
-
-  // if (robot.checkForStartSignal()) {
-    // delay(startDelayTime);
-    // // robot.turnLeftWithGyro();
-    // robot.turnLeftWithGyroErrorCorrection(90);
-    // delay(2 * 1000);
-    // robot.turnRightWithGyroErrorCorrection(90);
-    // robot.turnRightWithGyro();
-    // delay(startDelayTime);
-    // robot.moveForwardUsingEncoders();
-    // robot.moveForwardUsingEncoders();
-    // robot.moveForwardUsingEncoders();
-  //   robot.driveTillObstacle();
-
-  //   while (1) {
-  //     delay(100);
-  //   }
-  // }
-
-
-  //driveClockwiseLoop();
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-  //   robot.startFloodfill();
-
-  //   while (1) {delay(10);}
-  // }
-
-  // robot.startFloodfill();
-
-
-  // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
-  //robot.btSerial.printf("%d \n", robot.tofLeft.getDist());
-  // robot.turnRightWithGyroErrorCorrection(90.0);  // testToFSensors();
-
-  // delay(3000);
-
-
-  // testToFSensors();
-
-  // Serial.println("Turn Right Now (90°)");
-  // robot.turnRightWithGyroErrorCorrection(90.0);
-  // delay(3000);
-  // Serial.println("Turn Left Now (90°)");
-  // robot.turnLeftWithGyroErrorCorrection(90.0);
-  // delay(3000);
 }
