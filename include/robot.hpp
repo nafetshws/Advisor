@@ -85,7 +85,7 @@ class Robot {
         // dt
         unsigned long prevTime;
 
-
+        // Deprecated - used for turning
         float rightBrake;
         float leftBrake;
 
@@ -97,41 +97,44 @@ class Robot {
         bool wallFront();
         bool wallRight();
         bool wallLeft();
-
-        void moveForwardUsingToF(int distance = 1);
         void moveForwardUsingEncoders(int distance = 1);
-        void cellCorrectionWithToF(); 
-        void correctWithFrontWall(); 
-        void turnRight(bool disableTurnErrorCorrection = false);
-        void turnLeft(bool disableTurnErrorCorrection = false);
-        // void turnLeftWithGyro(float degrees = 69);
-        // void turnRightWithGyro(float degrees = 79);
+        void turnLeft(float degrees = 90);
+        void turnRight(float degress = 90);
+        ////////////////////////////////////////////
+
+        // Algorithms
+        void startFloodfill();
+        void ballPickUp();
+        void driveTillObstacle();
+
+        // Helper functions
+        int16_t calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples = 3);
+        void smallAdjustmentGyro(float degrees, bool turnLeft);
         void turnLeftWithGyro(float degrees = 90);
         void turnRightWithGyro(float degrees = 90);
+
+        // Error correction
+        void correctSteeringError(); //PD - Control
+        void correctTurnError();
+        void correctWithFrontWall(); 
+        void cellCorrectionWithToF(); 
+
+        //DIP switch control
+        bool checkForStartSignal();
+        bool checkForTurnSignal();
+
+        // Deprecated methods ////////////////////
+        void moveForwardUsingToF(int distance = 1);
         void turnLeftWithGyroErrorCorrection(float degrees = 90);
         void turnRightWithGyroErrorCorrection(float degrees = 90);
         float leftGyroHelper(float degrees = 0.0);
         float rightGyroHelper(float degrees = 0.0);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
-
-        ////////////////////////////////////////////
-
-        void driveTillObstacle();
-        bool checkForStartSignal();
-        bool checkForTurnSignal();
-        void correctTurnError();
-        void correctSteeringError();
-
-        void smallAdjustmentGyro(float degrees, bool turnLeft);
-        void tl(float degrees = 90);
-        void tr(float degress = 90);
-
-        int16_t calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples = 3);
-
-        void startFloodfill();
-
-        void ballPickUp();
+        void turnRightSimple(bool disableTurnErrorCorrection = false);
+        void turnLeftSimple(bool disableTurnErrorCorrection = false);
+        //////////////////////////////////////////
 };
+
 
 #endif

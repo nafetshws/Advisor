@@ -56,7 +56,7 @@ void driveClockwiseLoop() {
     robot.correctWithFrontWall();
     delay(delayTime);
     // robot.turnRightWithGyroErrorCorrection(90);
-    robot.tr(90);
+    robot.turnRight(90);
   }
 }
 

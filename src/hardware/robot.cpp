@@ -141,7 +141,7 @@ void Robot::turnRightWithEncoders() {
            startEncRightValue + TURN_ENC_TICKS < currentEncRight);
 }
 
-void Robot::turnRight(bool disableTurnErrorCorrection) {
+void Robot::turnRightSimple(bool disableTurnErrorCorrection) {
   long startTime = millis();
 
   motorRight.turnBackward(turnSpeed);
@@ -157,7 +157,7 @@ void Robot::turnRight(bool disableTurnErrorCorrection) {
   if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
-void Robot::turnLeft(bool disableTurnErrorCorrection) {
+void Robot::turnLeftSimple(bool disableTurnErrorCorrection) {
   long startTime = millis();
   
   motorRight.turnForward(turnSpeed);
@@ -408,7 +408,7 @@ void Robot::correctTurnError() {
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference) / 4;
       // Calls turnRight(), but disables error correction to avoid infinite recursion
-      this->turnRight(true);
+      this->turnRightSimple(true);
       this->turnTime = turnTimeTmp;
     } else {
       // Turn left
@@ -416,7 +416,7 @@ void Robot::correctTurnError() {
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference) / 4;
       // Calls turnLeft(), but disables error correction to avoid infinite recursion
-      this->turnLeft(true);
+      this->turnLeftSimple(true);
       this->turnTime = turnTimeTmp;
     }
 
@@ -528,13 +528,9 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  // TODO: update value for circumference
   float wheelRotationsNeeded = (distance * 16.4) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
-
-  // motorLeft.turnForward(this->driveSpeed);
-  // motorRight.turnForward(this->driveSpeed + 25);
 
   uint16_t speedDelta = this->driveSpeed / 5;
 
@@ -552,18 +548,8 @@ void Robot::moveForwardUsingEncoders(int distance) {
   } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
            getEncRight() - startValueEncRight < motorRotationsNeeded);
 
-  // Break over a time frame of 100 ms 
-/*   for (int i = 0; i < 5; i++) {
-    motorLeft.turnForward(motorLeft.getSpeed()  - speedDelta);
-    motorRight.turnForward(motorLeft.getSpeed() - speedDelta);
-    delay(20);
-  } */
-
   motorLeft.stopMotor();
   motorRight.stopMotor();
-
-  // Use left and right TOF to correct error
-  // cellCorrectionWithToF();
 
   // resetLeftEncoder();
   // resetRightEncoder();
@@ -571,7 +557,6 @@ void Robot::moveForwardUsingEncoders(int distance) {
   delay(1000);
 }
 
-/*************Deprecated**********+***/
 void Robot::cellCorrectionWithToF() {
   uint16_t maxWallDistance = 180;
   uint16_t leftDistance = tofLeft.getDist();
@@ -629,7 +614,6 @@ void Robot::cellCorrectionWithToF() {
   resetLeftEncoder();
   resetRightEncoder();
 }
-/*********************************+***/
 
 int16_t Robot::calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples) {
   uint16_t leftFrontDistance = tofLeftFront.getDist();
@@ -714,7 +698,7 @@ void Robot::correctWithFrontWall() {
   resetRightEncoder();
 }
 
-void Robot::tl(float degrees) {
+void Robot::turnLeft(float degrees) {
   turnLeftWithGyro(degrees);
 
   btSerial.printf("Turned: %f degrees\n", getYawAngle());
@@ -728,7 +712,7 @@ void Robot::tl(float degrees) {
 
 } 
 
-void Robot::tr(float degrees) {
+void Robot::turnRight(float degrees) {
   turnRightWithGyro(degrees);
 
   btSerial.printf("Turned: %f degrees\n", getYawAngle());
@@ -828,11 +812,11 @@ void Robot::ballPickUp() {
   delay(1000);
   moveForwardUsingEncoders(1);
   delay(1000);
-  tr(90);
+  turnRight(90);
   delay(1000);
   moveForwardUsingEncoders(1);
   delay(1000);
-  tl(45);
+  turnLeft(45);
   delay(1000);
 
   // Insert logic for servo //////
@@ -866,7 +850,7 @@ void Robot::ballPickUp() {
   motorRight.stopMotor();
   ////////////////////////////////
 
-  tl(135);
+  turnLeft(135);
   delay(1000);
   moveForwardUsingEncoders();
   delay(1000);
