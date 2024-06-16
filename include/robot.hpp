@@ -121,6 +121,9 @@ class Robot {
         void correctTurnError();
         void correctWithFrontWall(); 
         void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
+        void correctFrontDistance();
+
+        void correctRobot(boolean isWallFront, boolean isWallRight, boolean isWallLeft);
 
         //DIP switch control
         bool checkForStartSignal();

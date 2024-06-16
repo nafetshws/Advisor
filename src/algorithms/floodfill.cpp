@@ -211,21 +211,30 @@ void floodfillHelper(Cell &c, int direction)
 
 void updateWalls(Cell& cell, int direction) {
     // if(MMS::wallFront()) {
+    boolean isWallFront = false;
+    boolean isWallRight = false;
+    boolean isWallLeft = false;
+
     if(wallFront()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[direction]);
+        isWallFront = true;
     }
 
     if(wallRight()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[(direction + 1) % 4]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction + 1) % 4]);
+        isWallRight = true;
     }
 
     if(wallLeft()) {
         int newDirection = mod(direction - 1, 4);
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[newDirection]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[newDirection]);
+        isWallLeft = true;
     }
+
+    
 }
 
 void Cell::setWall(char direction) {

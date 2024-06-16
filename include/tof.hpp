@@ -10,7 +10,7 @@
 #define TOF_START_ADDR 0x40
 
 // Error Offsets
-#define TOF_LEFT_FRONT_OFFSET 0 
+#define TOF_LEFT_FRONT_OFFSET 4 
 #define TOF_RIGHT_FRONT_OFFSET 0 
 #define TOF_LEFT_OFFSET 0 
 #define TOF_RIGHT_OFFSET 0 

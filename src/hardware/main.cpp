@@ -7,7 +7,7 @@
 Robot robot = Robot();
 
 // Delays
-uint16_t delayTime = 2 * 1000;
+uint16_t delayTime = 500;//2 * 1000;
 uint16_t startDelayTime = 3 * 1000;
 
 // Variables for testing ToF sensors
@@ -35,10 +35,10 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
-  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -61,7 +61,11 @@ void driveClockwiseLoop() {
     delay(delayTime);
     robot.correctWithFrontWall();
     delay(delayTime);
-    robot.turnRight();
+    robot.correctFrontDistance();
+    delay(delayTime);
+    robot.correctWithFrontWall();
+    delay(delayTime);
+    robot.turnLeft();
   }
 }
 
@@ -168,6 +172,7 @@ void setup() {
 
 
 void loop() {
+  // tuneKD();
   // testToFSensors();
   driveClockwiseLoop();
   // if (robot.checkForStartSignal()) {

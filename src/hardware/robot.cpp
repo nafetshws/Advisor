@@ -24,8 +24,8 @@ Robot::Robot() {
   this->maxDriveSpeed = 800;
 
   this->prevError = 0.0f;
-  this->KP = 0.3f;
-  this->KD = 0.35f;
+  this->KP = 0.4f;
+  this->KD = 0.22f;
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
@@ -528,7 +528,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  float wheelRotationsNeeded = (distance * 16.4) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 16.8) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
@@ -655,37 +655,13 @@ uint16_t Robot::calcAverageDistance(TOF_6180 &tof, int samples) {
   return distance / samples;
 }
 
-/*
-* The error is corrected in 3 stages:
-*   1. Turn until facing right or left side wall 
-*   2. Drive to the middle
-*   3. Turn to previous drive direction 
-*/
-void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
-  uint16_t maxWallDistance = 100;
-  boolean useLeftWall = false;
-  // There is no wall on the left
-  if (l1.getDist() <= maxWallDistance) {
-    useLeftWall = true;
-    // Step 1
-    turnLeft(90);
-  } else {
-    turnRight(90);
-  }
-
-  delay(500);
-
-  // alignRobot(tofLeftFront, tofRightFront);
-  this->correctWithFrontWall();
-
-  delay(500);
-
-  // Step 2
+void Robot::correctFrontDistance() {
   uint16_t distance = calcAverageDistance(tofLeftFront, 3);
-  while (distance > 62 || distance < 58) {
+
+  while (distance > 67 || distance < 63) {
     unsigned long startTime = micros();
 
-    if (distance < 60) {
+    if (distance < 65) {
       // Drive back
       motorLeft.turnBackward(correctionSpeed);
       motorRight.turnBackward(correctionSpeed);
@@ -705,9 +681,68 @@ void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
     distance = calcAverageDistance(tofLeftFront, 2);
   }
 
-  delay(500);
+}
+
+/*
+* The error is corrected in 3 stages:
+*   1. Turn until facing right or left side wall 
+*   2. Drive to the middle
+*   3. Turn to previous drive direction 
+*/
+void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
+  uint16_t maxWallDistance = 100;
+  boolean useLeftWall = false;
+  // There is no wall on the left
+  if (l1.getDist() <= maxWallDistance) {
+    useLeftWall = true;
+    // Step 1
+    turnLeft(90);
+  } else {
+    turnRight(90);
+  }
+
+  delay(300);
+
+  // alignRobot(tofLeftFront, tofRightFront);
   this->correctWithFrontWall();
-  delay(500);
+
+  delay(300);
+
+  // Step 2
+  this->correctFrontDistance();
+  delay(300);
+  this->correctWithFrontWall();
+  delay(300);
+
+
+  // uint16_t distance = calcAverageDistance(tofLeftFront, 3);
+  // while (distance > 62 || distance < 58) {
+  //   unsigned long startTime = micros();
+
+  //   if (distance < 60) {
+  //     // Drive back
+  //     motorLeft.turnBackward(correctionSpeed);
+  //     motorRight.turnBackward(correctionSpeed);
+  //   } else {
+  //     // Drive forward
+  //     motorLeft.turnForward(correctionSpeed);
+  //     motorRight.turnForward(correctionSpeed);
+  //   }
+
+  //   while (micros() - startTime < 20 * 1e3) {
+
+  //   }
+
+  //   motorLeft.stopMotor();
+  //   motorRight.stopMotor();
+
+  //   distance = calcAverageDistance(tofLeftFront, 2);
+  // }
+
+  // delay(500);
+  // this->correctWithFrontWall();
+  // this->correctFrontDistance();
+  // delay(500);
 
   // Step 3
   if (useLeftWall) {
@@ -808,7 +843,7 @@ void Robot::correctWithFrontWall() {
     } else if (abs(difference) < 20) {
         btSerial.printf("Starting fine adjustement\n");
 
-        while (abs(difference) > 1) {
+        while (abs(difference) > 2) {
           btSerial.printf("Difference: %d\n", difference);
           unsigned long startTime = micros();
 
@@ -830,7 +865,8 @@ void Robot::correctWithFrontWall() {
 
           difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
         }
-      return;
+
+        return;
     } 
 
     // If the difference is negative, turn left else right
