@@ -51,14 +51,34 @@ void testGyroData() {
 void driveClockwiseLoop() {
   if (robot.checkForStartSignal()) {
     delay(delayTime);
-    robot.driveTillObstacle();
+    robot.moveForwardUsingEncoders();
     delay(delayTime);
-    robot.correctWithFrontWall();
+    robot.moveForwardUsingEncoders();
     delay(delayTime);
-    // robot.turnRightWithGyroErrorCorrection(90);
-    robot.turnRight(90);
+    robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+    delay(delayTime);
+    robot.moveForwardUsingEncoders();
+    delay(delayTime);
+    robot.turnRight();
   }
 }
+
+// void driveClockwiseLoop() {
+//   if (robot.checkForStartSignal()) {
+//     delay(delayTime);
+//     robot.driveTillObstacle();
+//     delay(delayTime);
+//     robot.correctWithFrontWall();
+//     delay(delayTime);
+//     robot.turnRight(90);
+
+
+//     delay(delayTime);
+//     robot.driveTillObstacle();
+//     delay(delayTime);
+//     robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+//   }
+// }
 
 void tuneKD() {
   if (robot.checkForStartSignal()) {
@@ -146,11 +166,17 @@ void setup() {
 
 
 void loop() {
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    robot.ballPickUp();
-    while (1) {
+  driveClockwiseLoop();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
 
-    }
-  }
+  //   // robot.ballPickUp();
+  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+
+
+
+  //   while (1) {
+
+  //   }
+  // }
 }

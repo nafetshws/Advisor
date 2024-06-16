@@ -89,6 +89,8 @@ class Robot {
         float rightBrake;
         float leftBrake;
 
+        //last PD terms
+        uint16_t lastPDTerms[2] = {0, 0};
 
         Robot();
         void setupRobot();
@@ -112,12 +114,15 @@ class Robot {
         void smallAdjustmentGyro(float degrees, bool turnLeft);
         void turnLeftWithGyro(float degrees = 90);
         void turnRightWithGyro(float degrees = 90);
+        void alignRobot(TOF_6180 &tof1, TOF_6180 &tof2);
+        void driveToMiddle(TOF_6180 &l1, TOF_6180 &l2, TOF_6180 &r1, TOF_6180 &r2);
+        uint16_t calcAverageDistance(TOF_6180 &tof, int samples);
 
         // Error correction
         void correctSteeringError(); //PD - Control
         void correctTurnError();
         void correctWithFrontWall(); 
-        void cellCorrectionWithToF(); 
+        void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
 
         //DIP switch control
         bool checkForStartSignal();

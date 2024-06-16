@@ -28,6 +28,8 @@ Robot::Robot() {
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
+  this->lastPDTerms[0] = 0; 
+  this->lastPDTerms[1] = 0; 
 
 }
 
@@ -89,7 +91,7 @@ void Robot::driveTillObstacle() {
   motorRight.turnForward(driveSpeed);
   motorLeft.turnForward(driveSpeed);
  
-  while (!irLeft.isTriggered() && !irRight.isTriggered()) {
+  while (!irLeft.isTriggered()) {
     this->correctSteeringError();
 
     delay(5);
@@ -534,12 +536,18 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   uint16_t speedDelta = this->driveSpeed / 5;
 
-  // Accelerate ofer a time frame of 100 ms to the desired speed
-  for (int i = 0; i < 5; i++) {
-    motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
-    motorRight.turnForward(motorRight.getSpeed() + speedDelta);
-    delay(20);
-  }
+  // Accelerate over a time frame of 100 ms to the desired speed
+  // for (int i = 0; i < 5; i++) {
+  //   motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
+  //   motorRight.turnForward(motorRight.getSpeed() + speedDelta);
+  //   delay(20);
+  // }
+
+  // if (this->lastPDTerms[0] = 0) {
+
+  motorLeft.turnForward(driveSpeed);
+  motorRight.turnForward(driveSpeed);
+  // }
 
   // Move forward until distance is covered, while correcting the steering error
   do {
@@ -557,10 +565,165 @@ void Robot::moveForwardUsingEncoders(int distance) {
   delay(1000);
 }
 
-void Robot::cellCorrectionWithToF() {
+void Robot::alignRobot(TOF_6180 &tof1, TOF_6180 &tof2) {
+  int16_t difference = calcAverageDifference(tof1, tof2, 2);
+
+  while (abs(difference) > 2) {
+    btSerial.printf("Difference: %d\n", difference);
+    unsigned long startTime = micros();
+
+    // If the difference is negative, turn left else right
+    if (difference < 0) {
+      motorLeft.turnBackward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    } else {
+      motorRight.turnBackward(turnSpeed);
+      motorLeft.turnForward(turnSpeed);
+    }
+
+    // TODO: update value late
+    while (micros() - startTime < 20 * 1e3) {
+      
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+  }
+}
+
+void Robot::driveToMiddle(TOF_6180 &l1, TOF_6180 &l2, TOF_6180 &r1, TOF_6180 &r2) {
+  uint16_t timeToCorrect = 300;
+
+  int16_t difference = calcAverageDifference(l1, r1, 3);
+  while(abs(difference) > 10) {
+    // Initiate correction
+
+    // Robot is too much to the right if positive -> correct left
+    if (difference < 0) {
+      uint32_t startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorRight.turnBackward(turnSpeed);
+      }
+      motorRight.stopMotor();
+
+      startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorLeft.turnBackward(turnSpeed);
+      }
+      motorLeft.stopMotor();
+    } else {
+      uint32_t startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorLeft.turnBackward(turnSpeed);
+      }
+      motorLeft.stopMotor();
+
+      startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorRight.turnBackward(turnSpeed);
+      }
+      motorRight.stopMotor();
+    }
+
+    // Drive forward again
+    int16_t startTime = millis();
+    while (millis() - startTime < timeToCorrect) {
+      motorLeft.turnForward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    difference = calcAverageDifference(l1, r1, 2);
+  }
+}
+
+uint16_t Robot::calcAverageDistance(TOF_6180 &tof, int samples) {
+  uint16_t distance = 0; 
+
+  for (int i = 0; i < samples; i++) {
+    uint16_t measuredDistance = tof.getDist();
+    // distance += tof.getDist();
+    distance += measuredDistance; 
+  }
+
+  return distance / samples;
+}
+
+/*
+* The error is corrected in 3 stages:
+*   1. Turn until facing right or left side wall 
+*   2. Drive to the middle
+*   3. Turn to previous drive direction 
+*/
+void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
+  uint16_t maxWallDistance = 100;
+  boolean useLeftWall = false;
+  // There is no wall on the left
+  if (l1.getDist() <= maxWallDistance) {
+    useLeftWall = true;
+    // Step 1
+    turnLeft(90);
+  } else {
+    turnRight(90);
+  }
+
+  delay(500);
+
+  // alignRobot(tofLeftFront, tofRightFront);
+  this->correctWithFrontWall();
+
+  delay(500);
+
+  // Step 2
+  uint16_t distance = calcAverageDistance(tofLeftFront, 3);
+  while (distance > 62 || distance < 58) {
+    unsigned long startTime = micros();
+
+    if (distance < 60) {
+      // Drive back
+      motorLeft.turnBackward(driveSpeed);
+      motorRight.turnBackward(driveSpeed);
+    } else {
+      // Drive forward
+      motorLeft.turnForward(driveSpeed);
+      motorRight.turnForward(driveSpeed);
+    }
+
+    while (micros() - startTime < 20 * 1e3) {
+
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    distance = calcAverageDistance(tofLeftFront, 2);
+  }
+
+  delay(500);
+  this->correctWithFrontWall();
+  delay(500);
+
+  // Step 3
+  if (useLeftWall) {
+    turnRight(90);
+  } else {
+    turnLeft(90);
+  }
+}
+
+/*
+void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &l2, TOF_6180 &r1, TOF_6180 &r2) { 
   uint16_t maxWallDistance = 180;
-  uint16_t leftDistance = tofLeft.getDist();
-  uint16_t rightDistance = tofRight.getDist();
+  uint16_t leftDistance = l1.getDist();
+  uint16_t rightDistance = r1.getDist();
 
   int16_t difference = leftDistance - rightDistance; 
 
@@ -614,14 +777,15 @@ void Robot::cellCorrectionWithToF() {
   resetLeftEncoder();
   resetRightEncoder();
 }
+*/
 
 int16_t Robot::calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples) {
-  uint16_t leftFrontDistance = tofLeftFront.getDist();
-  uint16_t rightFrontDistance = tofRightFront.getDist();
+  uint16_t leftFrontDistance = tof1.getDist();
+  uint16_t rightFrontDistance = tof2.getDist();
 
   for (int i = 0; i < samples - 1; i++) {
-     leftFrontDistance += tofLeftFront.getDist(); 
-     rightFrontDistance += tofRightFront.getDist();
+     leftFrontDistance += tof1.getDist(); 
+     rightFrontDistance += tof2.getDist();
 
     //  delay(50);
   }
@@ -783,8 +947,8 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
-  Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
   if (leftMotorSpeedPid > this->maxDriveSpeed) { 
@@ -794,6 +958,9 @@ void Robot::correctSteeringError() {
   {
     rightMotorSpeedPid = this->maxDriveSpeed;
   }
+
+  lastPDTerms[0] = leftMotorSpeedPid;
+  lastPDTerms[1] = rightMotorSpeedPid;
 
   // Sets each motor to the pd adjusted speed ////////
   this->motorLeft.turnForward(leftMotorSpeedPid);
