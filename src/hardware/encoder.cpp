@@ -1,38 +1,30 @@
 #include "../../include/encoder.hpp"
 
 
-void Timer0_ISR() {
+/* void Timer0_ISR() {
     // isr is called every 100 milli seconds
     // calc the revolutions per second of the wheel
     //
     //  rps = revolution_per_100ms * 1s / 100ms
     //
-    rpsA = (MOTA_ROT_COUNT / 3) * INTERUPTS_PER_SECOND;
-    rpsB = (MOTB_ROT_COUNT / 3) * INTERUPTS_PER_SECOND;
+    rpsA = (ENC_RIGHT_COUNT / 3) * INTERUPTS_PER_SECOND;
+    rpsB = (ENC_LEFT_COUNT / 3) * INTERUPTS_PER_SECOND;
 
     // set the counters to 0 for next calculation
-    MOTA_ROT_COUNT = 0;
-    MOTB_ROT_COUNT = 0;
-}
+    ENC_RIGHT_COUNT = 0;
+    ENC_LEFT_COUNT = 0;
+} */
 
 
 void IRAM_ATTR EncoderA01_ISR() {
     // increase rotation count
-    MOTA_ROT_COUNT++;
-    // check rotation direction every 8 turns (bit mask 00..00111)
-    if ( MOTA_ROT_COUNT & 0x7 == 0x7) {
-        dirA = (digitalRead(pinEncoderA2)) ? 1 : -1;
-    }
+    ENC_RIGHT_COUNT++;
 }
 
 
 void IRAM_ATTR EncoderB01_ISR() {
     // increase rotation count
-    MOTB_ROT_COUNT++;
-    // check rotation direction every 8 turns (bit mask 00..00111)
-    if ( MOTB_ROT_COUNT & 0x7 == 0x7) {
-        dirB = (digitalRead(pinEncoderB2)) ? 1 : -1;
-    }
+    ENC_LEFT_COUNT++;
 }
 
 void initEncoders(uint8_t encA01, uint8_t encA02, uint8_t encB01, uint8_t encB02) {
@@ -52,17 +44,17 @@ void initEncoders(uint8_t encA01, uint8_t encA02, uint8_t encB01, uint8_t encB02
     attachInterrupt(encB01, &EncoderB01_ISR, RISING);
 
     // configure the timer0 interrupt
-    Timer0_Cfg = timerBegin(0, TIMER0_PRESCALAR, true);
-    timerAttachInterrupt(Timer0_Cfg, &Timer0_ISR, true);
-    timerAlarmWrite(Timer0_Cfg, TIMER0_ALARM_AT, true);
-    timerAlarmEnable(Timer0_Cfg);
+    // Timer0_Cfg = timerBegin(0, TIMER0_PRESCALAR, true);
+    // timerAttachInterrupt(Timer0_Cfg, &Timer0_ISR, true);
+    // timerAlarmWrite(Timer0_Cfg, TIMER0_ALARM_AT, true);
+    // timerAlarmEnable(Timer0_Cfg);
 }
 
-uint16_t getRpsMotorA() {
+/* uint32_t getRpsMotorA() {
     return rpsA;
 }
 
-uint16_t getRpsMotorB() {
+uint32_t getRpsMotorB() {
     return rpsB;
 }
 
@@ -72,4 +64,20 @@ int16_t getDirMotorA () {
 
 int16_t getDirMotorB () {
     return rpsB * dirB;
+} */
+
+uint32_t getEncRight() {
+    return ENC_RIGHT_COUNT;
+}
+
+uint32_t getEncLeft() {
+    return ENC_LEFT_COUNT;
+}
+
+void resetLeftEncoder() {
+    ENC_LEFT_COUNT = 0;
+}
+
+void resetRightEncoder() {
+    ENC_RIGHT_COUNT = 0;
 }

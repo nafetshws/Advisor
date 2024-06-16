@@ -4,6 +4,8 @@ TEST_FILES = test/test.cpp
 OUT = build/main
 TEST_OUT = build/test
 
+INC = -I lib/Adafruit_VL53L0X/src
+
 CC_FLAGS = -std=c++17 -Wall -O3
 BUILD_DIR = ./build
 
@@ -16,7 +18,7 @@ all: clean #compiles everything
 	$(MAKE) test
 
 main: build_directory #only compiles the application
-	g++ -o $(OUT) src/algorithms/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+	g++ -o $(OUT) src/algorithms/main.cpp $(FILES) $(CC_FLAGS) $(INC) -D DEBUG=$(DEBUG)
 
 test: build_directory #only compiles the tests
 	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0

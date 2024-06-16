@@ -4,12 +4,13 @@
 #include <cstdint>
 
 // ESP PWM Channels
-#define MOTORA_PWM_CHANNEL 0
-#define MOTORB_PWM_CHANNEL 1
+// servo motor always use channel 1
+#define MOTORA_PWM_CHANNEL 2
+#define MOTORB_PWM_CHANNEL 3
 // ESP PWM Frequency 4kHz
 #define MOTOR_PWM_FREQUENCY 4000
 // ESP PWM RESOLUTION 8 Bit
-#define MOTOR_PWM_RESOLUTION 8
+#define MOTOR_PWM_RESOLUTION 11 // 2^11 = 2048 
 
 
 class Motor {
@@ -37,19 +38,19 @@ public:
      * @brief   Inifitly turns the motor forward with specified speed
      * @param   speed       motor speed, 8 bit resolution, 0 -> STOP 255 -> FULLSPEED
     */
-    void turnForward(uint8_t speed);
+    void turnForward(uint16_t speed);
 
 
     /**
      * @brief   Inifitly turns the motor backwards with specified speed
      * @param   speed       motor speed, 8 bit resolution, 0 -> STOP 255 -> FULLSPEED
     */
-    void turnBackward(uint8_t speed);
+    void turnBackward(uint16_t speed);
 
     /**
      * @brief   Returns currents set speed of motor
     */
-    uint8_t getSpeed();
+    uint16_t getSpeed();
 
 
     /**
@@ -66,7 +67,7 @@ private:
 
     uint8_t pwmChannel;     // Internal PWM channel
 
-    uint8_t speed = 0;      // Speed of motor
+    uint16_t speed = 0;      // Speed of motor
 };
 
 #endif

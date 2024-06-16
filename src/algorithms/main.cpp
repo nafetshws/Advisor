@@ -7,24 +7,40 @@ int main() {
     //Floodfill
     Maze::initMaze();
 
+    // Display manhattan distance in mms
     for(int y = 0; y < SIZE; y++) {
         for(int x = 0; x < SIZE; x++) {
             MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
         }
     }
+    // Start floodfill
     floodfill(*Maze::startCell);
-    optimisePath();
+    //optimisePath();
 
     // Reverse Floodfill
-    Maze::initMazeReverse();
-    for (int y = 0; y < SIZE; y++)
-    {
-        for (int x = 0; x < SIZE; x++)
-        {
-            MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
-        }
-    }
+    //Maze::initMazeReverse();
+    //for (int y = 0; y < SIZE; y++)
+    //{
+    //    for (int x = 0; x < SIZE; x++)
+    //    {
+    //        MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
+    //    }
+    //}
 
-    floodfill(*Maze::endCell, direction_last);
-    optimisePath();
+    //floodfill(*Maze::endCell, direction_last);
+    //optimisePath();
+
+    // std::cerr<<"lastdir: "<<direction_last<<std::endl;
+
+    // Maze::initMazeReverse();
+
+    // for (int y = 0; y < SIZE; y++)
+    // {
+    //     for (int x = 0; x < SIZE; x++)
+    //     {
+    //         MMS::setText(x, y, std::to_string(Maze::get(x, y)->distance));
+    //     }
+    // }
+
+    // floodfill(*Maze::endCell, direction_last);
 }
