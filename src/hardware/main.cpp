@@ -35,8 +35,8 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
-  // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
+  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
@@ -58,6 +58,8 @@ void driveClockwiseLoop() {
     robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
     delay(delayTime);
     robot.moveForwardUsingEncoders();
+    delay(delayTime);
+    robot.correctWithFrontWall();
     delay(delayTime);
     robot.turnRight();
   }
@@ -166,6 +168,7 @@ void setup() {
 
 
 void loop() {
+  // testToFSensors();
   driveClockwiseLoop();
   // if (robot.checkForStartSignal()) {
   //   delay(startDelayTime);

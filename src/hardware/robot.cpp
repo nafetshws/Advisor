@@ -15,8 +15,9 @@ Robot::Robot() {
 
   this->turnTime = 270;
   // this->turnSpeed = 500;
-  this->turnSpeed = 550;
-  this->driveSpeed = 550;
+  this->turnSpeed = 450;
+  this->driveSpeed = 450;
+  this->correctionSpeed = 550;
   this->wallDistance = 80;
   this->cellWidth = 160;
   this->tofTurnError = 10;
@@ -28,9 +29,6 @@ Robot::Robot() {
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
-  this->lastPDTerms[0] = 0; 
-  this->lastPDTerms[1] = 0; 
-
 }
 
 void Robot::setupRobot() {
@@ -574,11 +572,11 @@ void Robot::alignRobot(TOF_6180 &tof1, TOF_6180 &tof2) {
 
     // If the difference is negative, turn left else right
     if (difference < 0) {
-      motorLeft.turnBackward(turnSpeed);
-      motorRight.turnForward(turnSpeed);
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
     } else {
-      motorRight.turnBackward(turnSpeed);
-      motorLeft.turnForward(turnSpeed);
+      motorRight.turnBackward(correctionSpeed);
+      motorLeft.turnForward(correctionSpeed);
     }
 
     // TODO: update value late
@@ -689,12 +687,12 @@ void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
 
     if (distance < 60) {
       // Drive back
-      motorLeft.turnBackward(driveSpeed);
-      motorRight.turnBackward(driveSpeed);
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnBackward(correctionSpeed);
     } else {
       // Drive forward
-      motorLeft.turnForward(driveSpeed);
-      motorRight.turnForward(driveSpeed);
+      motorLeft.turnForward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
     }
 
     while (micros() - startTime < 20 * 1e3) {
@@ -810,17 +808,17 @@ void Robot::correctWithFrontWall() {
     } else if (abs(difference) < 20) {
         btSerial.printf("Starting fine adjustement\n");
 
-        while (abs(difference) > 2) {
+        while (abs(difference) > 1) {
           btSerial.printf("Difference: %d\n", difference);
           unsigned long startTime = micros();
 
           // If the difference is negative, turn left else right
           if (difference < 0) {
-            motorLeft.turnBackward(turnSpeed);
-            motorRight.turnForward(turnSpeed);
+            motorLeft.turnBackward(correctionSpeed);
+            motorRight.turnForward(correctionSpeed);
           } else {
-            motorRight.turnBackward(turnSpeed);
-            motorLeft.turnForward(turnSpeed);
+            motorRight.turnBackward(correctionSpeed);
+            motorLeft.turnForward(correctionSpeed);
           }
 
           while (micros() - startTime < 30 * 1e3) {
@@ -901,11 +899,11 @@ void Robot::smallAdjustmentGyro(float degrees, bool turnLeft) {
     unsigned long startTime = micros();
 
     if (turnLeft) {
-      motorLeft.turnBackward(turnSpeed);
-      motorRight.turnForward(turnSpeed);
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
     } else {
-      motorRight.turnBackward(turnSpeed);
-      motorLeft.turnForward(turnSpeed);
+      motorRight.turnBackward(correctionSpeed);
+      motorLeft.turnForward(correctionSpeed);
     }
 
     while (micros() - startTime < 20 * 1e3) {
@@ -958,9 +956,6 @@ void Robot::correctSteeringError() {
   {
     rightMotorSpeedPid = this->maxDriveSpeed;
   }
-
-  lastPDTerms[0] = leftMotorSpeedPid;
-  lastPDTerms[1] = rightMotorSpeedPid;
 
   // Sets each motor to the pd adjusted speed ////////
   this->motorLeft.turnForward(leftMotorSpeedPid);

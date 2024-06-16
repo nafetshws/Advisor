@@ -68,6 +68,7 @@ class Robot {
         uint16_t turnTime;
         uint16_t turnSpeed;
         uint16_t driveSpeed;
+        uint16_t correctionSpeed;
         uint16_t maxDriveSpeed;
 
         uint16_t wallDistance;
@@ -88,9 +89,6 @@ class Robot {
         // Deprecated - used for turning
         float rightBrake;
         float leftBrake;
-
-        //last PD terms
-        uint16_t lastPDTerms[2] = {0, 0};
 
         Robot();
         void setupRobot();
