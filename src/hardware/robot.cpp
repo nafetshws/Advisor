@@ -18,15 +18,13 @@ Robot::Robot() {
   this->turnSpeed = 420;
   this->driveSpeed = 400;
   this->correctionSpeed = 550;
-  this->wallDistance = 100;
+  this->wallDistance = 120;
   this->cellWidth = 160;
   this->tofTurnError = 10;
-  this->maxDriveSpeed = 800;
+  this->maxDriveSpeed = 550;
 
   this->prevError = 0.0f;
-  // this->KP = 0.4f;
-  // this->KD = 0.22f;
-  this->KP = 0.3f;
+  this->KP = 0.2f;
   this->KD = 0.35f;
   
   this->rightBrake = 0.1;
@@ -91,11 +89,13 @@ void Robot::setupRobot() {
 void Robot::driveTillObstacle() {
   motorRight.turnForward(driveSpeed);
   motorLeft.turnForward(driveSpeed);
+
+  unsigned long startTime = millis();
  
-  while (!irLeft.isTriggered()) {
+  while (millis() - startTime < 8000) {
     this->correctSteeringError();
 
-    delay(5);
+    delay(10);
   }
 
   motorRight.stopMotor();
@@ -527,7 +527,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  float wheelRotationsNeeded = (distance * 16.) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 16.6) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
@@ -559,7 +559,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   // resetLeftEncoder();
   // resetRightEncoder();
 
-  delay(1000);
+  delay(700);
 }
 
 void Robot::alignRobot(TOF_6180 &tof1, TOF_6180 &tof2) {
@@ -689,10 +689,9 @@ void Robot::correctFrontDistance() {
 *   3. Turn to previous drive direction 
 */
 void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
-  uint16_t maxWallDistance = 100;
   boolean useLeftWall = false;
   // There is no wall on the left
-  if (l1.getDist() <= maxWallDistance) {
+  if (l1.getDist() <= this->wallDistance) {
     useLeftWall = true;
     // Step 1
     turnLeft(90);
@@ -712,36 +711,6 @@ void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
   delay(300);
   this->correctWithFrontWall();
   delay(300);
-
-
-  // uint16_t distance = calcAverageDistance(tofLeftFront, 3);
-  // while (distance > 62 || distance < 58) {
-  //   unsigned long startTime = micros();
-
-  //   if (distance < 60) {
-  //     // Drive back
-  //     motorLeft.turnBackward(correctionSpeed);
-  //     motorRight.turnBackward(correctionSpeed);
-  //   } else {
-  //     // Drive forward
-  //     motorLeft.turnForward(correctionSpeed);
-  //     motorRight.turnForward(correctionSpeed);
-  //   }
-
-  //   while (micros() - startTime < 20 * 1e3) {
-
-  //   }
-
-  //   motorLeft.stopMotor();
-  //   motorRight.stopMotor();
-
-  //   distance = calcAverageDistance(tofLeftFront, 2);
-  // }
-
-  // delay(500);
-  // this->correctWithFrontWall();
-  // this->correctFrontDistance();
-  // delay(500);
 
   // Step 3
   if (useLeftWall) {
@@ -950,7 +919,7 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
   // Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
@@ -976,33 +945,34 @@ void Robot::startFloodfill() {
 }
 
 void Robot::ballPickUp() {
+  uint16_t delayTime = 350;
   // Align robot
   correctWithFrontWall();
-  delay(500);
+  delay(delayTime);
   correctFrontDistance();
-  delay(500);
+  delay(delayTime);
   turnRight(90);
-  delay(500);
+  delay(delayTime);
   correctWithFrontWall();
-  delay(500);
+  delay(delayTime);
   correctFrontDistance();
-  delay(500);
+  delay(delayTime);
   turnRight(90);
 
   // Start routine
   delay(500);
   moveForwardUsingEncoders(1);
-  delay(500);
+  delay(delayTime);
   turnRight(90);
-  delay(1000);
+  delay(delayTime);
   moveForwardUsingEncoders(1);
-  delay(1000);
+  delay(delayTime);
   turnLeft(45);
-  delay(1000);
+  delay(delayTime);
 
   // Insert logic for servo //////
   servoDown();
-  delay(500);
+  delay(delayTime);
   uint16_t startTime = millis();
 
   // Drive to ball

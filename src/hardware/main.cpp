@@ -8,7 +8,7 @@ Robot robot = Robot();
 
 // Delays
 uint16_t delayTime = 500;//2 * 1000;
-uint16_t startDelayTime = 3 * 1000;
+uint16_t startDelayTime = 2 * 1000;
 
 // Variables for testing ToF sensors
 long long counter = 0;
@@ -183,16 +183,36 @@ void testMotors() {
   robot.btSerial.printf("Final encoder values: L: %d R: %d\n", getEncLeft(), getEncRight());
 }
 
+void testMoveForward() {
+  if(robot.checkForStartSignal()) {
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    delay(500);
+    robot.moveForwardUsingEncoders();
+    resetLeftEncoder();
+    resetRightEncoder();
+  }
+}
+
 void startRun() {
   if (robot.checkForStartSignal()) {
     delay(startDelayTime);
     robot.btSerial.printf("Starting floodfill\n");
-    // robot.startFloodfill();
-
     robot.ballPickUp();
-    delay(5*1000);
+    delay(2*1000);
     robot.startFloodfill();
-    // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+
+    // make small winner dance
 
     while (1) {
 
@@ -210,29 +230,5 @@ void setup() {
 
 
 void loop() {
-  // startRun();
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    // testMotors();
-    robot.driveTillObstacle();
-    while(1) {}
-  }
-
-  // tuneKD();
-  // testToFSensors();
-  // driveClockwiseLoop();
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
-  //   robot.btSerial.printf("Starting floodfill\n");
-  //   // robot.startFloodfill();
-
-  //   robot.ballPickUp();
-  //   delay(5*1000);
-  //   robot.startFloodfill();
-  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
-
-  //   while (1) {
-
-  //   }
-  // }
+  startRun();
 }
