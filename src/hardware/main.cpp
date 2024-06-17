@@ -38,7 +38,7 @@ void testToFSensors() {
   // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  Serial.printf("avg left fron: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -162,19 +162,28 @@ void driveCustomTrack() {
   }
 }
 
-void setup() {
-  robot.setupRobot();
-  resetLeftEncoder();
-  resetRightEncoder();
-  robot.btSerial.printf("SETUP\n");
+void testMotors() {
+  uint16_t speed = 750;
+
+  robot.motorLeft.turnForward(speed);
+  robot.motorRight.turnForward(speed);
+
+  uint16_t startTime = millis();
+
+  while (millis() - startTime < 3000) {
+  robot.btSerial.printf("Encoder values: L: %d R: %d\n", getEncLeft(), getEncRight());
+    delay(20);
+  }
+
+  robot.motorLeft.stopMotor();
+  robot.motorRight.stopMotor();
+
+  delay(500);
+
+  robot.btSerial.printf("Final encoder values: L: %d R: %d\n", getEncLeft(), getEncRight());
 }
 
-
-
-void loop() {
-  // tuneKD();
-  // testToFSensors();
-  // driveClockwiseLoop();
+void startRun() {
   if (robot.checkForStartSignal()) {
     delay(startDelayTime);
     robot.btSerial.printf("Starting floodfill\n");
@@ -189,4 +198,41 @@ void loop() {
 
     }
   }
+}
+
+void setup() {
+  robot.setupRobot();
+  resetLeftEncoder();
+  resetRightEncoder();
+  robot.btSerial.printf("SETUP\n");
+}
+
+
+
+void loop() {
+  // startRun();
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    // testMotors();
+    robot.driveTillObstacle();
+    while(1) {}
+  }
+
+  // tuneKD();
+  // testToFSensors();
+  // driveClockwiseLoop();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   robot.btSerial.printf("Starting floodfill\n");
+  //   // robot.startFloodfill();
+
+  //   robot.ballPickUp();
+  //   delay(5*1000);
+  //   robot.startFloodfill();
+  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+
+  //   while (1) {
+
+  //   }
+  // }
 }

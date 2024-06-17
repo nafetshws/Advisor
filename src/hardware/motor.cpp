@@ -30,7 +30,12 @@ void Motor::turnForward(uint16_t speed) {
     digitalWrite(pinA, HIGH);
     digitalWrite(pinB, LOW);
     // set speed with pwm pin over pwm channel
-    ledcWrite(pwmChannel, speed);
+    if (pwmChannel == MOTORA_PWM_CHANNEL) {
+        //right motor needs to be 5% faster
+        ledcWrite(pwmChannel, 1.05 * speed);
+    } else {
+        ledcWrite(pwmChannel, speed);
+    }
     // save speed
     this->speed = speed;
 }
@@ -41,7 +46,12 @@ void Motor::turnBackward(uint16_t speed) {
     digitalWrite(pinA, LOW);
     digitalWrite(pinB, HIGH);
     // set speed with pwm pin over pwm channel
-    ledcWrite(pwmChannel, speed);
+    if (pwmChannel == MOTORA_PWM_CHANNEL) {
+        //right motor needs to be 5% faster
+        ledcWrite(pwmChannel, 1.05 * speed);
+    } else {
+        ledcWrite(pwmChannel, speed);
+    }
     // save speed
     this->speed = speed;
 }

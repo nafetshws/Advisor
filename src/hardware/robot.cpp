@@ -207,33 +207,24 @@ void Robot::turnRightWithGyroErrorCorrection(float degrees) {
 void Robot::turnRightWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
+  motorRight.turnBackward(turnSpeed); // Turn Mouse
+  motorLeft.turnForward(turnSpeed);
+
   while(smallerThan(degrees)) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
   
-    motorRight.turnBackward(turnSpeed); // Turn Mouse
-    motorLeft.turnForward(turnSpeed);
-  
-    delay(2);
+    delay(1);
   }
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  // for (int i = 0; i < 50; i++) {
-  //   readRawGyro();        // Get new Data
-  //   calcGyro();           // Calculate new Angle
-
-  //   btSerial.printf("Turned final %f degrees.\n", getYawAngle());
-  //   delay(1);
-  // }
-
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 300; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
     delay(1);
   }
-
   // btSerial.printf("Turn with gyro - Actually turned by: %f\n", angleYaw);
 
   resetLeftEncoder();
@@ -245,21 +236,21 @@ void Robot::turnLeftWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
   degrees *= -1.0;
+
+  motorRight.turnForward(turnSpeed); // Turn Mouse
+  motorLeft.turnBackward(turnSpeed);
   
   while(greaterThan(degrees)) { 
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
-
-    motorRight.turnForward(turnSpeed); // Turn Mouse
-    motorLeft.turnBackward(turnSpeed);
   
-    delay(2);
+    delay(1);
   }
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 300; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
     delay(1);
@@ -920,7 +911,7 @@ void Robot::smallAdjustmentGyro(float degrees, bool turnLeft) {
       motorLeft.turnForward(correctionSpeed);
     }
 
-    while (micros() - startTime < 20 * 1e3) {
+    while (micros() - startTime < 30 * 1e3) {
       readRawGyro();
       calcGyro();
     }
@@ -985,6 +976,20 @@ void Robot::startFloodfill() {
 }
 
 void Robot::ballPickUp() {
+  // Align robot
+  correctWithFrontWall();
+  delay(500);
+  correctFrontDistance();
+  delay(500);
+  turnRight(90);
+  delay(500);
+  correctWithFrontWall();
+  delay(500);
+  correctFrontDistance();
+  delay(500);
+  turnRight(90);
+
+  // Start routine
   delay(500);
   moveForwardUsingEncoders(1);
   delay(500);
