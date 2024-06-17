@@ -174,17 +174,17 @@ void setup() {
 void loop() {
   // tuneKD();
   // testToFSensors();
-  driveClockwiseLoop();
-  // if (robot.checkForStartSignal()) {
-  //   delay(startDelayTime);
+  // driveClockwiseLoop();
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    robot.btSerial.printf("Starting floodfill\n");
+    // robot.startFloodfill();
 
-  //   // robot.ballPickUp();
-  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+    robot.ballPickUp();
+    // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
 
+    while (1) {
 
-
-  //   while (1) {
-
-  //   }
-  // }
+    }
+  }
 }

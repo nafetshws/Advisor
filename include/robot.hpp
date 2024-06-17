@@ -90,6 +90,9 @@ class Robot {
         float rightBrake;
         float leftBrake;
 
+        // Error correction
+        uint16_t counterSinceLastCorrection;
+
         Robot();
         void setupRobot();
 
@@ -123,7 +126,7 @@ class Robot {
         void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
         void correctFrontDistance();
 
-        void correctRobot(boolean isWallFront, boolean isWallRight, boolean isWallLeft);
+        void correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight);
 
         //DIP switch control
         bool checkForStartSignal();
