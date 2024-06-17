@@ -15,8 +15,8 @@ Robot::Robot() {
 
   this->turnTime = 270;
   // this->turnSpeed = 500;
-  this->turnSpeed = 450;
-  this->driveSpeed = 450;
+  this->turnSpeed = 420;
+  this->driveSpeed = 400;
   this->correctionSpeed = 550;
   this->wallDistance = 100;
   this->cellWidth = 160;
@@ -24,8 +24,10 @@ Robot::Robot() {
   this->maxDriveSpeed = 800;
 
   this->prevError = 0.0f;
-  this->KP = 0.4f;
-  this->KD = 0.22f;
+  // this->KP = 0.4f;
+  // this->KD = 0.22f;
+  this->KP = 0.3f;
+  this->KD = 0.35f;
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
@@ -983,9 +985,9 @@ void Robot::startFloodfill() {
 }
 
 void Robot::ballPickUp() {
-  delay(1000);
+  delay(500);
   moveForwardUsingEncoders(1);
-  delay(1000);
+  delay(500);
   turnRight(90);
   delay(1000);
   moveForwardUsingEncoders(1);
@@ -995,7 +997,7 @@ void Robot::ballPickUp() {
 
   // Insert logic for servo //////
   servoDown();
-  delay(1000);
+  delay(500);
   uint16_t startTime = millis();
 
   // Drive to ball
@@ -1009,12 +1011,15 @@ void Robot::ballPickUp() {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  delay(1000);
+  delay(500);
   servoUp();
+  delay(2000);
 
   // Drive back
   motorLeft.turnBackward(driveSpeed);
   motorRight.turnBackward(driveSpeed);
+
+  // startTime = millis();
 
   while (millis() - startTime < 330) {
     
@@ -1025,8 +1030,32 @@ void Robot::ballPickUp() {
   ////////////////////////////////
 
   turnLeft(135);
-  delay(1000);
+  delay(300);
   moveForwardUsingEncoders();
-  delay(1000);
+  delay(300);
   correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnLeft();
+  delay(300);
+  moveForwardUsingEncoders();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnRight();
+  correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnRight();
+
 }

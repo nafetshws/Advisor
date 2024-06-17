@@ -3,8 +3,8 @@
 
 #include <ESP32Servo.h>
 
-#define SERVO_ANGLE_UP  132
-#define SERVO_ANGLE_DOWN 5
+#define SERVO_ANGLE_UP  140
+#define SERVO_ANGLE_DOWN 20
 #define SERVO_PWM_CHANNEL 1
 
 // ESP32Servo Object

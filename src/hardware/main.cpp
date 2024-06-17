@@ -181,6 +181,8 @@ void loop() {
     // robot.startFloodfill();
 
     robot.ballPickUp();
+    delay(5*1000);
+    robot.startFloodfill();
     // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
 
     while (1) {
