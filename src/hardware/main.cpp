@@ -3,6 +3,7 @@
 #include "../../include/robot.hpp"
 #include "../../include/encoder.hpp"
 
+
 // Robot instance
 Robot robot = Robot();
 
@@ -175,16 +176,20 @@ void loop() {
   // tuneKD();
   // testToFSensors();
   // driveClockwiseLoop();
-  if (robot.checkForStartSignal()) {
-    delay(startDelayTime);
-    robot.btSerial.printf("Starting floodfill\n");
-    // robot.startFloodfill();
+  // if (robot.checkForStartSignal()) {
+  //   delay(startDelayTime);
+  //   robot.btSerial.printf("Starting floodfill\n");
+  //   // robot.startFloodfill();
 
-    robot.ballPickUp();
-    // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+  //   robot.ballPickUp();
+  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
 
-    while (1) {
+  //   while (1) {
 
-    }
-  }
+  //   }
+  // }
+
+  robot.sendOne();
+
+  delay(10000);
 }

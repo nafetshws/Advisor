@@ -8,7 +8,12 @@
 #include "servo.hpp"
 #include "imu.hpp"
 
+
+
 #include <BluetoothSerial.h>
+#include <HardwareSerial.h>
+
+
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -51,7 +56,12 @@
 #define TURN_ENC_TICKS 51
 
 
+
+
+
+
 class Robot {
+    
     public:
         Motor motorRight; 
         Motor motorLeft;
@@ -83,6 +93,9 @@ class Robot {
         // Bluetooth Serial
         BluetoothSerial btSerial;
 
+        // Hardware Serial
+        HardwareSerial SerialMatrix; // 1 = USB Serial, wir können also 2 oder 3 wählen
+        
         // dt
         unsigned long prevTime;
 
@@ -142,6 +155,9 @@ class Robot {
         void turnLeftWithEncoders();
         void turnRightSimple(bool disableTurnErrorCorrection = false);
         void turnLeftSimple(bool disableTurnErrorCorrection = false);
+
+        void sendOne();
+        void sendTwo();
         //////////////////////////////////////////
 };
 

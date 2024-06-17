@@ -1,5 +1,7 @@
 #include <cstdint>
 #include "BluetoothSerial.h"
+#include "HardwareSerial.h"
+
 #include "../include/robot.hpp"
 #include "../include/encoder.hpp"
 #include "../include/imu.hpp"
@@ -39,6 +41,9 @@ void Robot::setupRobot() {
   Serial.begin(115200);
   // start 
   btSerial.begin("BallE BluetoothTestInterface");
+
+  SerialMatrix.begin(9600, SERIAL_8N1, 18, 19);
+
   Serial.println("\nSETUP: Serial Monitor running");
 
   // SETUP SERVO MOTOR //////////////////////////
@@ -1029,4 +1034,12 @@ void Robot::ballPickUp() {
   moveForwardUsingEncoders();
   delay(1000);
   correctWithFrontWall();
+}
+
+void Robot::sendOne() {
+SerialMatrix.print("1");
+}
+
+void Robot::sendTwo() {
+  SerialMatrix.print("2");
 }
