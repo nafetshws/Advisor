@@ -14,14 +14,16 @@ void initIMU(uint16_t CalSamples) {
     Wire.write(0x00);
   Wire.endTransmission();
 
-  int16_t i;
-  for (i = 0; i < CalSamples; i++){  // Calibration -> Mouse needs to be still
-    readRawGyro();
-    rateCalibrationYaw += rateYaw;
-    delay(1); 
-  }
+  // int16_t i;
+  // for (i = 0; i < CalSamples; i++){  // Calibration -> Mouse needs to be still
+  //   readRawGyro();
+  //   rateCalibrationYaw += rateYaw;
+  //   delay(1); 
+  // }
 
-  rateCalibrationYaw /= CalSamples; // // Calculate Calibration Values
+  // rateCalibrationYaw /= CalSamples; // // Calculate Calibration Values
+
+  rateCalibrationYaw = 0.3;
 
   Serial.println("Gyro Calibrated");
   Serial.println(rateCalibrationYaw);
@@ -68,6 +70,7 @@ void calcGyro() {
     angleYaw += rateYaw * deltaTime;    // Integrate to get the angle
   }
 
+  // Serial.printf("Current time: %ld \n", currentTime);;
   // Serial.print(rateYaw);
   // Serial.print("\t");
   // Serial.println(angleYaw);

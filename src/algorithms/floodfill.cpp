@@ -103,8 +103,9 @@ void floodfill(Cell &c, int direction) {
 }
 
 // Modified flood fill algorithm
-void floodfillHelper(Cell &c, int direction)
-{
+void floodfillHelper(Cell &c, int direction) {
+    Maze::robot->btSerial.printf("Entered floodfill helper\n");
+
     // add visited cell to path of robot
     if (Maze::reverseMode) {
         Maze::floodfillReversePath.push_back(&c);
@@ -210,22 +211,32 @@ void floodfillHelper(Cell &c, int direction)
 }
 
 void updateWalls(Cell& cell, int direction) {
-    // if(MMS::wallFront()) {
+    boolean isWallFront = false;
+    boolean isWallLeft = false;
+    boolean isWallRight = false;
+
+    delay(1000);
+
     if(wallFront()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[direction]);
+        isWallFront = true;
     }
 
     if(wallRight()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[(direction + 1) % 4]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction + 1) % 4]);
+        isWallRight = true;
     }
 
     if(wallLeft()) {
         int newDirection = mod(direction - 1, 4);
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[newDirection]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[newDirection]);
+        isWallLeft = true;
     }
+
+    Maze::robot->correctRobot(isWallFront, isWallLeft, isWallRight);
 }
 
 void Cell::setWall(char direction) {
@@ -319,7 +330,8 @@ bool Maze::getIsRobotAttached() {
 // Movement functions of robot
 void turnRight() {
     if (Maze::getIsRobotAttached()) {
-        Maze::robot->turnRightWithGyro();
+        Maze::robot->turnRight();
+        delay(300);
     } else {
         MMS::turnRight();
     }
@@ -327,7 +339,8 @@ void turnRight() {
 
 void turnLeft() {
     if (Maze::getIsRobotAttached()) {
-        Maze::robot->turnLeftWithGyro();
+        Maze::robot->turnLeft();
+        delay(300);
     } else {
         MMS::turnLeft();
     }
@@ -336,6 +349,7 @@ void turnLeft() {
 void moveForward(int distance) {
     if (Maze::getIsRobotAttached()) {
         Maze::robot->moveForwardUsingEncoders(distance);
+        delay(300);
     } else {
         MMS::moveForward(distance);
     }

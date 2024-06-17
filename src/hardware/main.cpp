@@ -7,7 +7,7 @@
 Robot robot = Robot();
 
 // Delays
-uint16_t delayTime = 2 * 1000;
+uint16_t delayTime = 500;//2 * 1000;
 uint16_t startDelayTime = 3 * 1000;
 
 // Variables for testing ToF sensors
@@ -35,10 +35,10 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
-  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  Serial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
-  robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  robot.btSerial.printf("avg left front: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
+  // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  Serial.printf("avg left fron: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -51,11 +51,40 @@ void testGyroData() {
 void driveClockwiseLoop() {
   if (robot.checkForStartSignal()) {
     delay(delayTime);
-    robot.driveTillObstacle();
+    robot.moveForwardUsingEncoders();
     delay(delayTime);
-    robot.turnRightWithGyro();
+    robot.moveForwardUsingEncoders();
+    delay(delayTime);
+    robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+    delay(delayTime);
+    robot.moveForwardUsingEncoders();
+    delay(delayTime);
+    robot.correctWithFrontWall();
+    delay(delayTime);
+    robot.correctFrontDistance();
+    delay(delayTime);
+    robot.correctWithFrontWall();
+    delay(delayTime);
+    robot.turnLeft();
   }
 }
+
+// void driveClockwiseLoop() {
+//   if (robot.checkForStartSignal()) {
+//     delay(delayTime);
+//     robot.driveTillObstacle();
+//     delay(delayTime);
+//     robot.correctWithFrontWall();
+//     delay(delayTime);
+//     robot.turnRight(90);
+
+
+//     delay(delayTime);
+//     robot.driveTillObstacle();
+//     delay(delayTime);
+//     robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+//   }
+// }
 
 void tuneKD() {
   if (robot.checkForStartSignal()) {
@@ -133,6 +162,44 @@ void driveCustomTrack() {
   }
 }
 
+void testMotors() {
+  uint16_t speed = 750;
+
+  robot.motorLeft.turnForward(speed);
+  robot.motorRight.turnForward(speed);
+
+  uint16_t startTime = millis();
+
+  while (millis() - startTime < 3000) {
+  robot.btSerial.printf("Encoder values: L: %d R: %d\n", getEncLeft(), getEncRight());
+    delay(20);
+  }
+
+  robot.motorLeft.stopMotor();
+  robot.motorRight.stopMotor();
+
+  delay(500);
+
+  robot.btSerial.printf("Final encoder values: L: %d R: %d\n", getEncLeft(), getEncRight());
+}
+
+void startRun() {
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    robot.btSerial.printf("Starting floodfill\n");
+    // robot.startFloodfill();
+
+    robot.ballPickUp();
+    delay(5*1000);
+    robot.startFloodfill();
+    // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
+
+    while (1) {
+
+    }
+  }
+}
+
 void setup() {
   robot.setupRobot();
   resetLeftEncoder();
@@ -143,31 +210,29 @@ void setup() {
 
 
 void loop() {
-  //driveClockwiseLoop();
+  // startRun();
+  if (robot.checkForStartSignal()) {
+    delay(startDelayTime);
+    // testMotors();
+    robot.driveTillObstacle();
+    while(1) {}
+  }
+
+  // tuneKD();
+  // testToFSensors();
+  // driveClockwiseLoop();
   // if (robot.checkForStartSignal()) {
   //   delay(startDelayTime);
-  //   // robot.driveTillObstacle();
+  //   robot.btSerial.printf("Starting floodfill\n");
+  //   // robot.startFloodfill();
+
+  //   robot.ballPickUp();
+  //   delay(5*1000);
   //   robot.startFloodfill();
+  //   // robot.cellCorrectionWithToF(robot.tofLeft, robot.tofRight, robot.tofRight);
 
-  //   while (1) {delay(10);}
+  //   while (1) {
+
+  //   }
   // }
-
-  // robot.startFloodfill();
-
-
-  // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", robot.tofLeft.getDist(), robot.tofLeftFront.getDist(), robot.tofRightFront.getDist(), robot.tofRight.getDist());
-  //robot.btSerial.printf("%d \n", robot.tofLeft.getDist());
-  // robot.turnRightWithGyroErrorCorrection(90.0);  // testToFSensors();
-
-  // delay(3000);
-
-
-  testToFSensors();
-
-  // Serial.println("Turn Right Now (90°)");
-  // robot.turnRightWithGyroErrorCorrection(90.0);
-  // delay(3000);
-  // Serial.println("Turn Left Now (90°)");
-  // robot.turnLeftWithGyroErrorCorrection(90.0);
-  // delay(3000);
 }

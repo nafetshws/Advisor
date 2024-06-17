@@ -14,20 +14,24 @@ Robot::Robot() {
   this->irRight = IR (TOF2_SHT_PIN);
 
   this->turnTime = 270;
-  this->turnSpeed = 500;
-  this->driveSpeed = 600;
-  this->wallDistance = 80;
+  // this->turnSpeed = 500;
+  this->turnSpeed = 420;
+  this->driveSpeed = 400;
+  this->correctionSpeed = 550;
+  this->wallDistance = 100;
   this->cellWidth = 160;
   this->tofTurnError = 10;
   this->maxDriveSpeed = 800;
 
   this->prevError = 0.0f;
+  // this->KP = 0.4f;
+  // this->KD = 0.22f;
   this->KP = 0.3f;
-  this->KD = 0.4f;
+  this->KD = 0.35f;
   
   this->rightBrake = 0.1;
   this->leftBrake = 0.1;
-
+  this->counterSinceLastCorrection = 0;
 }
 
 void Robot::setupRobot() {
@@ -62,6 +66,8 @@ void Robot::setupRobot() {
 
   // init all the tof sensors
   // first two vl53L0, last two vl6180
+  // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
+
   initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
 
   // initTofSensors(tofLeftFront, tofRightFront, tofLeft, tofRight);
@@ -86,7 +92,7 @@ void Robot::driveTillObstacle() {
   motorRight.turnForward(driveSpeed);
   motorLeft.turnForward(driveSpeed);
  
-  while (!irLeft.isTriggered() && !irRight.isTriggered()) {
+  while (!irLeft.isTriggered()) {
     this->correctSteeringError();
 
     delay(5);
@@ -138,7 +144,7 @@ void Robot::turnRightWithEncoders() {
            startEncRightValue + TURN_ENC_TICKS < currentEncRight);
 }
 
-void Robot::turnRight(bool disableTurnErrorCorrection) {
+void Robot::turnRightSimple(bool disableTurnErrorCorrection) {
   long startTime = millis();
 
   motorRight.turnBackward(turnSpeed);
@@ -154,7 +160,7 @@ void Robot::turnRight(bool disableTurnErrorCorrection) {
   if (!disableTurnErrorCorrection) this->correctTurnError();
 }
 
-void Robot::turnLeft(bool disableTurnErrorCorrection) {
+void Robot::turnLeftSimple(bool disableTurnErrorCorrection) {
   long startTime = millis();
   
   motorRight.turnForward(turnSpeed);
@@ -179,16 +185,21 @@ void Robot::turnRightWithGyroErrorCorrection(float degrees) {
   while(turns < 4) {
     if(offset > 0.0) {
       Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
       offset = rightGyroHelper(offset);
       turns ++;
     }
     else {
       offset *= -1.0;
       Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
       offset = leftGyroHelper(offset);
       turns ++;
     }
   }
+
+  btSerial.printf("Last offset: %f\n", offset);
+
   resetLeftEncoder();
   resetRightEncoder();
 }
@@ -196,55 +207,59 @@ void Robot::turnRightWithGyroErrorCorrection(float degrees) {
 void Robot::turnRightWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
+  motorRight.turnBackward(turnSpeed); // Turn Mouse
+  motorLeft.turnForward(turnSpeed);
+
   while(smallerThan(degrees)) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
   
-    motorRight.turnBackward(turnSpeed); // Turn Mouse
-    motorLeft.turnForward(turnSpeed);
-  
-    delay(2);
+    delay(1);
   }
-
-  btSerial.printf("Turned %f degrees.\n", getYawAngle());
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < 300; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
-
-    btSerial.printf("Turned final %f degrees.\n", getYawAngle());
     delay(1);
   }
-
+  // btSerial.printf("Turn with gyro - Actually turned by: %f\n", angleYaw);
 
   resetLeftEncoder();
   resetRightEncoder();
-  delay(1000);
 }
+
 
 void Robot::turnLeftWithGyro(float degrees) {
   setZeroAngle();         // Resets Angle
 
   degrees *= -1.0;
+
+  motorRight.turnForward(turnSpeed); // Turn Mouse
+  motorLeft.turnBackward(turnSpeed);
   
   while(greaterThan(degrees)) { 
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
-
-    motorRight.turnForward(turnSpeed); // Turn Mouse
-    motorLeft.turnBackward(turnSpeed);
   
-    delay(2);
+    delay(1);
   }
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
+  for (int i = 0; i < 300; i++) {
+    readRawGyro();        // Get new Data
+    calcGyro();           // Calculate new Angle
+    delay(1);
+  }
+
+  btSerial.printf("Turn with gyro - Turned by: %f\n", angleYaw);
+
   resetLeftEncoder();
   resetRightEncoder();
-  delay(1000);
 }
 
 
@@ -253,46 +268,52 @@ void Robot::turnLeftWithGyroErrorCorrection(float degrees) {
   float offset = -degrees;
   
   
-  while(turns < 4) {
+  while(turns < 10) {
     if(offset > 0.0) {
       Serial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the right for %f degrees\n", turns, offset);
       offset = rightGyroHelper(offset);
-      turns ++;
+      turns++;
     }
     else {
       offset *= -1.0;
       Serial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
+      btSerial.printf("Turn %d, this one to the left for %f degrees\n", turns, offset);
       offset = leftGyroHelper(offset);
       turns ++;
     }
   }
+
+  btSerial.printf("Last offset: %f\n", offset);
+
   resetLeftEncoder();
   resetRightEncoder();
 }
 
 float Robot::rightGyroHelper(float degrees)
 {
-
   setZeroAngle();
-  if (degrees < 2.0)
-  {
+
+  if (degrees < 1.5) {
     return degrees;
   }
 
-  while (getYawAngle() < (degrees - degrees * rightBrake))
-  {
-    // Serial.printf("Turning right \t %f \n", getYawAngle());
+  while (getYawAngle() < (degrees - degrees * rightBrake)) {
+    // btSerial.printf("Turning right: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
     readRawGyro();                      // Get new Data
     calcGyro();                         // Calculate new Angle
     motorRight.turnBackward(turnSpeed); // Turn Mouse
     motorLeft.turnForward(turnSpeed);
   }
+
   motorLeft.stopMotor();
   motorRight.stopMotor();
+
+  btSerial.printf("Stopped the motors at %f. Should turn %f. Brake was %f. Now Calculating Angle for a sec. \n", getYawAngle(), degrees, rightBrake);
+
   readRawGyro(); // Get new Data
   calcGyro();    // Calculate new Angle
 
-  Serial.println("Stopped the motors. Still Calculating Angle for a sec");
   for (int i = 0; i < 100; i++)
   {
     readRawGyro(); // Get new Data
@@ -302,7 +323,7 @@ float Robot::rightGyroHelper(float degrees)
 
   Serial.printf("Final Turn: %f degrees.\n", getYawAngle());
 
-  if (abs(getYawAngle() - degrees) > 1.0)
+  if (degrees > 30 && abs(getYawAngle() - degrees) > 1.0)
   {
     float temp = getYawAngle() - degrees;
     if(temp > 0.0) {
@@ -321,12 +342,12 @@ float Robot::rightGyroHelper(float degrees)
 float Robot::leftGyroHelper(float degrees) {
   
   setZeroAngle();
-  if(degrees < 2.0) {
+  if(degrees < 1.5) {
     return degrees;
   }
 
   while(getYawAngle() > (-degrees + degrees * leftBrake)) {
-    //  Serial.printf("Turning Left \t %f \n", getYawAngle());
+    //  btSerial.printf("Turning Left: %f   Winkelgeschwindigkeit: %f\n", getYawAngle(), getYawRate());
         readRawGyro();        // Get new Data
         calcGyro();           // Calculate new Angle
         motorRight.turnForward(turnSpeed); // Turn Mouse
@@ -334,10 +355,12 @@ float Robot::leftGyroHelper(float degrees) {
       }
       motorLeft.stopMotor();
       motorRight.stopMotor();
+
+      btSerial.printf("Stopped the motors at %f. Should turn %f. Brake was %f. Now Calculating Angle for a sec. \n", getYawAngle(), degrees, leftBrake);
+
       readRawGyro();        // Get new Data
       calcGyro();           // Calculate new Angle
           
-      Serial.println("Stopped the motors. Still Calculating Angle for a sec");
       for(int i = 0; i < 100; i++) {
         readRawGyro();        // Get new Data
         calcGyro();           // Calculate new Angle
@@ -346,7 +369,7 @@ float Robot::leftGyroHelper(float degrees) {
 
       Serial.printf("Final Turn: %f degrees.\n", getYawAngle());
 
-      if(abs((-getYawAngle()) - degrees) > 1.0) {
+      if(degrees > 30 && abs((-getYawAngle()) - degrees) > 1.0) {
         float temp = getYawAngle() + degrees;
         if((-getYawAngle()) - degrees > 0.0) {
           leftBrake += 0.02;
@@ -361,8 +384,6 @@ float Robot::leftGyroHelper(float degrees) {
   
 
 }
-
-
 
 /*************Deprecated**********+***/
 void Robot::correctTurnError() {
@@ -381,7 +402,7 @@ void Robot::correctTurnError() {
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference) / 4;
       // Calls turnRight(), but disables error correction to avoid infinite recursion
-      this->turnRight(true);
+      this->turnRightSimple(true);
       this->turnTime = turnTimeTmp;
     } else {
       // Turn left
@@ -389,7 +410,7 @@ void Robot::correctTurnError() {
       // rotation time is proportional to the distance difference between the tof sensors
       this->turnTime = abs(distanceDifference) / 4;
       // Calls turnLeft(), but disables error correction to avoid infinite recursion
-      this->turnLeft(true);
+      this->turnLeftSimple(true);
       this->turnTime = turnTimeTmp;
     }
 
@@ -415,57 +436,62 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  this->btSerial.println("Front Wall");
-  bool hasWall;
-  bool hasChanged = false;
-  while (!hasChanged) {
-    if (this->btSerial.available()) {
-      std::string s(btSerial.readStringUntil('\n').c_str());
-      hasWall = stoi(s);
-      hasChanged = true;
-    }
-  }
+  // this->btSerial.println("Front Wall");
+  // bool hasWall;
+  // bool hasChanged = false;
+  // while (!hasChanged) {
+  //   if (this->btSerial.available()) {
+  //     std::string s(btSerial.readStringUntil('\n').c_str());
+  //     hasWall = stoi(s);
+  //     hasChanged = true;
+  //   }
+  // }
 
-  // hasWall = tofLeftFront.getDist() < this->wallDistance || tofRightFront.getDist() < this->wallDistance;
+  uint16_t averageDistance = calcAverageDistance(tofLeftFront, 3);
+  bool hasWall = averageDistance < this->wallDistance;
+
+  // bool hasWall = tofLeftFront.getDist() < this->wallDistance && tofRightFront.getDist() < this->wallDistance;
   // hasWall = tofRightFront.getDist() < this->wallDistance;
-  // this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  this->btSerial.printf("front wall measured: %d - Distance: %d\n", hasWall, averageDistance);
   // return hasWall;
   // bool hasWall = irLeft.isTriggered() && irRight.isTriggered();
-  this->btSerial.printf("Front wall measured: %d\n", hasWall);
+  // this->btSerial.printf("Front wall measured: %d\n", hasWall);
   return hasWall;
 }
 
 bool Robot::wallRight() {
-   this->btSerial.println("Right Wall");
-  bool hasWall;
-  bool hasChanged = false;
-  while (!hasChanged) {
-    if (this->btSerial.available()) {
-      std::string s(btSerial.readStringUntil('\n').c_str());
-      hasWall = stoi(s);
-      hasChanged = true;
-    }
-  }
+  //  this->btSerial.println("Right Wall");
+  // bool hasWall;
+  // bool hasChanged = false;
+  // while (!hasChanged) {
+  //   if (this->btSerial.available()) {
+  //     std::string s(btSerial.readStringUntil('\n').c_str());
+  //     hasWall = stoi(s);
+  //     hasChanged = true;
+  //   }
+  // }
 
-  // hasWall = tofRight.getDist() < this->wallDistance;
-  this->btSerial.printf("Right wall measured: %d\n", hasWall);
+  uint16_t averageDistance = calcAverageDistance(tofRight, 3);
+  bool hasWall = averageDistance < this->wallDistance;
+  this->btSerial.printf("Right wall measured: %d - Distance: %d\n", hasWall, averageDistance);
   return hasWall;
 }
 
 bool Robot::wallLeft() {
-this->btSerial.println("Left Wall");
-bool hasWall;
-bool hasChanged = false;
-  while (!hasChanged) {
-    if (this->btSerial.available()) {
-      std::string s(btSerial.readStringUntil('\n').c_str());
-      hasWall = stoi(s);
-      hasChanged = true;
-    }
-  }
+// this->btSerial.println("Left Wall");
+// bool hasWall;
+// bool hasChanged = false;
+//   while (!hasChanged) {
+//     if (this->btSerial.available()) {
+//       std::string s(btSerial.readStringUntil('\n').c_str());
+//       hasWall = stoi(s);
+//       hasChanged = true;
+//     }
+//   }
 
-  // hasWall = tofLeft.getDist() < this->wallDistance;
-  this->btSerial.printf("Left wall measured: %d\n", hasWall);
+  uint16_t averageDistance = calcAverageDistance(tofLeft, 3);
+  bool hasWall = averageDistance < this->wallDistance;
+  this->btSerial.printf("Left wall measured: %d - Distance: %d\n", hasWall, averageDistance);
   return hasWall;
 }
 
@@ -501,22 +527,24 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  // TODO: update value for circumference
-  float wheelRotationsNeeded = (distance * 15) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 16.) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
-  // motorLeft.turnForward(this->driveSpeed);
-  // motorRight.turnForward(this->driveSpeed + 25);
-
   uint16_t speedDelta = this->driveSpeed / 5;
 
-  // Accelerate ofer a time frame of 100 ms to the desired speed
-  for (int i = 0; i < 5; i++) {
-    motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
-    motorRight.turnForward(motorRight.getSpeed() + speedDelta);
-    delay(20);
-  }
+  // Accelerate over a time frame of 100 ms to the desired speed
+  // for (int i = 0; i < 5; i++) {
+  //   motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
+  //   motorRight.turnForward(motorRight.getSpeed() + speedDelta);
+  //   delay(20);
+  // }
+
+  // if (this->lastPDTerms[0] = 0) {
+
+  motorLeft.turnForward(driveSpeed);
+  motorRight.turnForward(driveSpeed);
+  // }
 
   // Move forward until distance is covered, while correcting the steering error
   do {
@@ -525,20 +553,381 @@ void Robot::moveForwardUsingEncoders(int distance) {
   } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
            getEncRight() - startValueEncRight < motorRotationsNeeded);
 
-  // Break over a time frame of 100 ms 
-/*   for (int i = 0; i < 5; i++) {
-    motorLeft.turnForward(motorLeft.getSpeed()  - speedDelta);
-    motorRight.turnForward(motorLeft.getSpeed() - speedDelta);
-    delay(20);
-  } */
-
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  resetLeftEncoder();
-  resetRightEncoder();
+  // resetLeftEncoder();
+  // resetRightEncoder();
 
   delay(1000);
+}
+
+void Robot::alignRobot(TOF_6180 &tof1, TOF_6180 &tof2) {
+  int16_t difference = calcAverageDifference(tof1, tof2, 2);
+
+  while (abs(difference) > 2) {
+    btSerial.printf("Difference: %d\n", difference);
+    unsigned long startTime = micros();
+
+    // If the difference is negative, turn left else right
+    if (difference < 0) {
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
+    } else {
+      motorRight.turnBackward(correctionSpeed);
+      motorLeft.turnForward(correctionSpeed);
+    }
+
+    // TODO: update value late
+    while (micros() - startTime < 20 * 1e3) {
+      
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+  }
+}
+
+void Robot::driveToMiddle(TOF_6180 &l1, TOF_6180 &l2, TOF_6180 &r1, TOF_6180 &r2) {
+  uint16_t timeToCorrect = 300;
+
+  int16_t difference = calcAverageDifference(l1, r1, 3);
+  while(abs(difference) > 10) {
+    // Initiate correction
+
+    // Robot is too much to the right if positive -> correct left
+    if (difference < 0) {
+      uint32_t startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorRight.turnBackward(turnSpeed);
+      }
+      motorRight.stopMotor();
+
+      startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorLeft.turnBackward(turnSpeed);
+      }
+      motorLeft.stopMotor();
+    } else {
+      uint32_t startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorLeft.turnBackward(turnSpeed);
+      }
+      motorLeft.stopMotor();
+
+      startTime = millis();
+
+      while (millis() - startTime < timeToCorrect) {
+        motorRight.turnBackward(turnSpeed);
+      }
+      motorRight.stopMotor();
+    }
+
+    // Drive forward again
+    int16_t startTime = millis();
+    while (millis() - startTime < timeToCorrect) {
+      motorLeft.turnForward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    difference = calcAverageDifference(l1, r1, 2);
+  }
+}
+
+uint16_t Robot::calcAverageDistance(TOF_6180 &tof, int samples) {
+  uint16_t distance = 0; 
+
+  for (int i = 0; i < samples; i++) {
+    uint16_t measuredDistance = tof.getDist();
+    // distance += tof.getDist();
+    distance += measuredDistance; 
+  }
+
+  return distance / samples;
+}
+
+void Robot::correctFrontDistance() {
+  uint16_t distance = calcAverageDistance(tofLeftFront, 3);
+
+  while (distance > 67 || distance < 63) {
+    unsigned long startTime = micros();
+
+    if (distance < 65) {
+      // Drive back
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnBackward(correctionSpeed);
+    } else {
+      // Drive forward
+      motorLeft.turnForward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
+    }
+
+    while (micros() - startTime < 20 * 1e3) {
+
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    distance = calcAverageDistance(tofLeftFront, 2);
+  }
+
+}
+
+/*
+* The error is corrected in 3 stages:
+*   1. Turn until facing right or left side wall 
+*   2. Drive to the middle
+*   3. Turn to previous drive direction 
+*/
+void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
+  uint16_t maxWallDistance = 100;
+  boolean useLeftWall = false;
+  // There is no wall on the left
+  if (l1.getDist() <= maxWallDistance) {
+    useLeftWall = true;
+    // Step 1
+    turnLeft(90);
+  } else {
+    turnRight(90);
+  }
+
+  delay(300);
+
+  // alignRobot(tofLeftFront, tofRightFront);
+  this->correctWithFrontWall();
+
+  delay(300);
+
+  // Step 2
+  this->correctFrontDistance();
+  delay(300);
+  this->correctWithFrontWall();
+  delay(300);
+
+
+  // uint16_t distance = calcAverageDistance(tofLeftFront, 3);
+  // while (distance > 62 || distance < 58) {
+  //   unsigned long startTime = micros();
+
+  //   if (distance < 60) {
+  //     // Drive back
+  //     motorLeft.turnBackward(correctionSpeed);
+  //     motorRight.turnBackward(correctionSpeed);
+  //   } else {
+  //     // Drive forward
+  //     motorLeft.turnForward(correctionSpeed);
+  //     motorRight.turnForward(correctionSpeed);
+  //   }
+
+  //   while (micros() - startTime < 20 * 1e3) {
+
+  //   }
+
+  //   motorLeft.stopMotor();
+  //   motorRight.stopMotor();
+
+  //   distance = calcAverageDistance(tofLeftFront, 2);
+  // }
+
+  // delay(500);
+  // this->correctWithFrontWall();
+  // this->correctFrontDistance();
+  // delay(500);
+
+  // Step 3
+  if (useLeftWall) {
+    turnRight(90);
+  } else {
+    turnLeft(90);
+  }
+}
+
+
+void Robot::correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight) {
+  if (isWallFront && isWallLeft && isWallRight) {
+    this->correctWithFrontWall();
+    delay(300);
+    this->correctFrontDistance();
+    delay(300);
+    this->correctWithFrontWall();
+    delay(300);
+    this->cellCorrectionWithToF(tofLeft, tofRight, tofRight);
+    delay(300);
+  } else if (isWallFront) {
+    this->correctWithFrontWall();
+    delay(300);
+    this->correctFrontDistance();
+    delay(300);
+    this->correctWithFrontWall();
+    delay(300);
+  } else if ((isWallLeft || isWallRight) && counterSinceLastCorrection > 3) {
+    this->cellCorrectionWithToF(tofLeft, tofRight, tofRight);
+    delay(300);
+  } else {
+    counterSinceLastCorrection++;
+    return;
+  }
+  
+  counterSinceLastCorrection = 0;
+}
+
+
+int16_t Robot::calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples) {
+  uint16_t leftFrontDistance = tof1.getDist();
+  uint16_t rightFrontDistance = tof2.getDist();
+
+  for (int i = 0; i < samples - 1; i++) {
+     leftFrontDistance += tof1.getDist(); 
+     rightFrontDistance += tof2.getDist();
+
+    //  delay(50);
+  }
+
+  leftFrontDistance /= samples;
+  rightFrontDistance /= samples;
+
+  return leftFrontDistance - rightFrontDistance;
+}
+
+void Robot::correctWithFrontWall() {
+  float TURN_CORRECTION_CONSTANT = 0.9;
+
+  int16_t difference = this->calcAverageDifference(tofLeftFront, tofRightFront); 
+
+  // btSerial.printf("Turning for %f ms. Difference: %d\n", difference * TURN_CORRECTION_CONSTANT, difference);
+
+  for (int i = 0; i < 1000; i++) {
+    // Abbort correction if the margin of error is too small 
+    if (abs(difference) <= 2) {
+      return;
+    } else if (abs(difference) < 20) {
+        // btSerial.printf("Starting fine adjustement\n");
+
+        while (abs(difference) > 2) {
+          // btSerial.printf("Difference: %d\n", difference);
+          unsigned long startTime = micros();
+
+          // If the difference is negative, turn left else right
+          if (difference < 0) {
+            motorLeft.turnBackward(correctionSpeed);
+            motorRight.turnForward(correctionSpeed);
+          } else {
+            motorRight.turnBackward(correctionSpeed);
+            motorLeft.turnForward(correctionSpeed);
+          }
+
+          while (micros() - startTime < 30 * 1e3) {
+            
+          }
+
+          motorLeft.stopMotor();
+          motorRight.stopMotor();
+
+          difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+        }
+
+        return;
+    } 
+
+    // If the difference is negative, turn left else right
+    if (difference < 0) {
+      motorLeft.turnBackward(turnSpeed);
+      motorRight.turnForward(turnSpeed);
+    } else {
+      motorRight.turnBackward(turnSpeed);
+      motorLeft.turnForward(turnSpeed);
+    }
+
+    // btSerial.printf("Turning for %f ms. Difference: %d\n", difference * TURN_CORRECTION_CONSTANT, difference);
+
+    uint16_t startTime = millis();
+
+    while (millis() - startTime < abs(difference) * TURN_CORRECTION_CONSTANT) {
+
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    difference = this->calcAverageDifference(tofLeftFront, tofRightFront); 
+  }
+
+  resetLeftEncoder();
+  resetRightEncoder();
+}
+
+void Robot::turnLeft(float degrees) {
+  turnLeftWithGyro(degrees);
+
+  // btSerial.printf("Turned: %f degrees\n", getYawAngle());
+
+  if (getYawAngle() + degrees > 0) {
+    // Didn't turn far enough -> turn left further
+    smallAdjustmentGyro(getYawAngle() + degrees, true);
+  } else {
+    smallAdjustmentGyro(abs(getYawAngle()) - degrees, false);
+  }
+
+} 
+
+void Robot::turnRight(float degrees) {
+  turnRightWithGyro(degrees);
+
+  // btSerial.printf("Turned: %f degrees\n", getYawAngle());
+
+  if (degrees - getYawAngle() > 0) {
+    // Didn't turn far enough -> turn right further
+    // btSerial.printf("Correcting further to the right\n");
+    smallAdjustmentGyro(degrees - getYawAngle(), false);
+  } else {
+    // btSerial.printf("Correcting further to the left\n");
+    smallAdjustmentGyro(getYawAngle() - degrees, true);
+  }
+} 
+
+void Robot::smallAdjustmentGyro(float degrees, bool turnLeft) {
+  setZeroAngle();
+
+  readRawGyro();
+  calcGyro();
+
+  while (abs(getYawAngle()) < degrees - 0.8) {
+    unsigned long startTime = micros();
+
+    if (turnLeft) {
+      motorLeft.turnBackward(correctionSpeed);
+      motorRight.turnForward(correctionSpeed);
+    } else {
+      motorRight.turnBackward(correctionSpeed);
+      motorLeft.turnForward(correctionSpeed);
+    }
+
+    while (micros() - startTime < 30 * 1e3) {
+      readRawGyro();
+      calcGyro();
+    }
+
+    motorLeft.stopMotor();
+    motorRight.stopMotor();
+
+    // difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+    for (int i = 0; i < 50; i++) {
+      readRawGyro();
+      calcGyro();
+      delay(1);
+    }
+
+    // btSerial.printf("Angle turned: %f\n", getYawAngle());
+  }
 }
 
 void Robot::correctSteeringError() {
@@ -561,8 +950,8 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
-  Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
   if (leftMotorSpeedPid > this->maxDriveSpeed) { 
@@ -584,4 +973,94 @@ void Robot::startFloodfill() {
   Maze::attachRobot(this);
   floodfill(*Maze::startCell);
   Maze::dettachRobot();
+}
+
+void Robot::ballPickUp() {
+  // Align robot
+  correctWithFrontWall();
+  delay(500);
+  correctFrontDistance();
+  delay(500);
+  turnRight(90);
+  delay(500);
+  correctWithFrontWall();
+  delay(500);
+  correctFrontDistance();
+  delay(500);
+  turnRight(90);
+
+  // Start routine
+  delay(500);
+  moveForwardUsingEncoders(1);
+  delay(500);
+  turnRight(90);
+  delay(1000);
+  moveForwardUsingEncoders(1);
+  delay(1000);
+  turnLeft(45);
+  delay(1000);
+
+  // Insert logic for servo //////
+  servoDown();
+  delay(500);
+  uint16_t startTime = millis();
+
+  // Drive to ball
+  motorLeft.turnForward(driveSpeed);
+  motorRight.turnForward(driveSpeed);
+
+  while (millis() - startTime < 330) {
+    
+  }
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+
+  delay(500);
+  servoUp();
+  delay(2000);
+
+  // Drive back
+  motorLeft.turnBackward(driveSpeed);
+  motorRight.turnBackward(driveSpeed);
+
+  // startTime = millis();
+
+  while (millis() - startTime < 330) {
+    
+  }
+
+  motorLeft.stopMotor();
+  motorRight.stopMotor();
+  ////////////////////////////////
+
+  turnLeft(135);
+  delay(300);
+  moveForwardUsingEncoders();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnLeft();
+  delay(300);
+  moveForwardUsingEncoders();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnRight();
+  correctWithFrontWall();
+  delay(300);
+  correctFrontDistance();
+  delay(300);
+  correctWithFrontWall();
+  delay(300);
+  turnRight();
+
 }

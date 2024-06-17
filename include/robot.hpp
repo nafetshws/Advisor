@@ -41,8 +41,6 @@
 #define SERVO_PIN 23
 
 
-
-
 // Error bounds
 #define MIN_ERROR_THRESHOLD 10
 #define MAX_ERROR_THRESHOLD 100
@@ -59,8 +57,8 @@ class Robot {
         Motor motorLeft;
 
         // TOF Sensor Objects (MUST be constructed Robot.hpp, OTHERWISE ESP32 CRASHES)
-        TOF tofLeftFront =    TOF(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
-        TOF tofRightFront =   TOF(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
+        TOF_6180 tofLeftFront =    TOF_6180(1, TOF_START_ADDR + 1, TOF3_SHT_PIN);
+        TOF_6180 tofRightFront =   TOF_6180(2, TOF_START_ADDR + 2, TOF4_SHT_PIN);
         TOF_6180 tofLeft  =   TOF_6180(3, TOF_START_ADDR + 3, TOF5_SHT_PIN);
         TOF_6180 tofRight =   TOF_6180(4, TOF_START_ADDR + 4, TOF6_SHT_PIN);
 
@@ -70,6 +68,7 @@ class Robot {
         uint16_t turnTime;
         uint16_t turnSpeed;
         uint16_t driveSpeed;
+        uint16_t correctionSpeed;
         uint16_t maxDriveSpeed;
 
         uint16_t wallDistance;
@@ -87,10 +86,12 @@ class Robot {
         // dt
         unsigned long prevTime;
 
-
+        // Deprecated - used for turning
         float rightBrake;
         float leftBrake;
 
+        // Error correction
+        uint16_t counterSinceLastCorrection;
 
         Robot();
         void setupRobot();
@@ -99,30 +100,50 @@ class Robot {
         bool wallFront();
         bool wallRight();
         bool wallLeft();
-
-        void moveForwardUsingToF(int distance = 1);
         void moveForwardUsingEncoders(int distance = 1);
-        void turnRight(bool disableTurnErrorCorrection = false);
-        void turnLeft(bool disableTurnErrorCorrection = false);
-        void turnLeftWithGyro(float degrees = 69);
-        void turnRightWithGyro(float degrees = 79);
+        void turnLeft(float degrees = 90);
+        void turnRight(float degress = 90);
+        ////////////////////////////////////////////
+
+        // Algorithms
+        void startFloodfill();
+        void ballPickUp();
+        void driveTillObstacle();
+
+        // Helper functions
+        int16_t calcAverageDifference(TOF_6180 &tof1, TOF_6180 &tof2, int samples = 3);
+        void smallAdjustmentGyro(float degrees, bool turnLeft);
+        void turnLeftWithGyro(float degrees = 90);
+        void turnRightWithGyro(float degrees = 90);
+        void alignRobot(TOF_6180 &tof1, TOF_6180 &tof2);
+        void driveToMiddle(TOF_6180 &l1, TOF_6180 &l2, TOF_6180 &r1, TOF_6180 &r2);
+        uint16_t calcAverageDistance(TOF_6180 &tof, int samples);
+
+        // Error correction
+        void correctSteeringError(); //PD - Control
+        void correctTurnError();
+        void correctWithFrontWall(); 
+        void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
+        void correctFrontDistance();
+
+        void correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight);
+
+        //DIP switch control
+        bool checkForStartSignal();
+        bool checkForTurnSignal();
+
+        // Deprecated methods ////////////////////
+        void moveForwardUsingToF(int distance = 1);
         void turnLeftWithGyroErrorCorrection(float degrees = 90);
         void turnRightWithGyroErrorCorrection(float degrees = 90);
         float leftGyroHelper(float degrees = 0.0);
         float rightGyroHelper(float degrees = 0.0);
         void turnRightWithEncoders();
         void turnLeftWithEncoders();
-        ////////////////////////////////////////////
-
-        void driveTillObstacle();
-        bool checkForStartSignal();
-        bool checkForTurnSignal();
-        void correctTurnError();
-        void correctSteeringError();
-
-
-
-        void startFloodfill();
+        void turnRightSimple(bool disableTurnErrorCorrection = false);
+        void turnLeftSimple(bool disableTurnErrorCorrection = false);
+        //////////////////////////////////////////
 };
+
 
 #endif
