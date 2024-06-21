@@ -527,7 +527,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  float wheelRotationsNeeded = (distance * 16.6) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 16.4) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
