@@ -35,10 +35,10 @@ void testToFSensors() {
   int averageLeft = sumLeft / counter;
   int averageRight = sumRight / counter;
 
-  // Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
+  Serial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
   // robot.btSerial.printf("avg left front: %d\tavg right front: %d\tleft front: %d\tright front: %d\n", averageLeftFront, averageRightFront, leftFrontDistance, rightFrontDistance);
   // robot.btSerial.printf("L: %d, LF: %d, RF: %d, R: %d\n", leftDistance, leftFrontDistance, rightFrontDistance, rightDistance);
-  Serial.printf("avg left fron: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
+  // Serial.printf("avg left fron: %d\tavg right front: %d\tavg left: %d\tavg right: %d\n", averageLeftFront, averageRightFront, averageLeft, averageRight);
 }
 
 void testGyroData() {
@@ -207,9 +207,11 @@ void testMoveForward() {
 void startRun() {
   if (robot.checkForStartSignal()) {
     delay(startDelayTime);
+    robot.calibrateToFOffsets();
+    delay(500);
     robot.btSerial.printf("Starting floodfill\n");
     robot.ballPickUp();
-    delay(2*1000);
+    delay(500);
     robot.startFloodfill();
 
     // make small winner dance

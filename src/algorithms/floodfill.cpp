@@ -215,7 +215,22 @@ void updateWalls(Cell& cell, int direction) {
     boolean isWallLeft = false;
     boolean isWallRight = false;
 
-    delay(1000);
+    // delay(200);
+
+    if(wallFront()) {
+        isWallFront = true;
+    }
+
+    if(wallRight()) {
+        isWallRight = true;
+    }
+
+    if(wallLeft()) {
+        isWallLeft = true;
+    }
+
+    Maze::robot->correctRobot(isWallFront, isWallLeft, isWallRight);
+    // Update walls after correcting
 
     if(wallFront()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
@@ -236,7 +251,7 @@ void updateWalls(Cell& cell, int direction) {
         isWallLeft = true;
     }
 
-    Maze::robot->correctRobot(isWallFront, isWallLeft, isWallRight);
+
 }
 
 void Cell::setWall(char direction) {
@@ -331,7 +346,7 @@ bool Maze::getIsRobotAttached() {
 void turnRight() {
     if (Maze::getIsRobotAttached()) {
         Maze::robot->turnRight();
-        delay(300);
+        delay(200);
     } else {
         MMS::turnRight();
     }
@@ -340,7 +355,7 @@ void turnRight() {
 void turnLeft() {
     if (Maze::getIsRobotAttached()) {
         Maze::robot->turnLeft();
-        delay(300);
+        delay(200);
     } else {
         MMS::turnLeft();
     }
@@ -349,7 +364,7 @@ void turnLeft() {
 void moveForward(int distance) {
     if (Maze::getIsRobotAttached()) {
         Maze::robot->moveForwardUsingEncoders(distance);
-        delay(300);
+        delay(100);
     } else {
         MMS::moveForward(distance);
     }

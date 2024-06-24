@@ -125,6 +125,7 @@ class Robot {
         void correctWithFrontWall(); 
         void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
         void correctFrontDistance();
+        void calibrateToFOffsets();
 
         void correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight);
 
