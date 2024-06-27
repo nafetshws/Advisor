@@ -5,9 +5,9 @@
 #include <iostream>
 #include "../../include/floodfill.hpp"
 #include "../../include/mms.hpp"
-#define FLOODFILL_INCLUDE
+#ifndef DONT_INCLUDE_LIBS 
 #include "../../include/robot.hpp"
-#undef FLOODFILL_INCLUDE
+#endif
 
 #define VISITED_PATH_WEIGHT 1
 
@@ -24,7 +24,9 @@ std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
 Graph g;
 int direction_last = 0;
+#ifndef DONT_INCLUDE_LIBS
 Robot *Maze::robot;
+#endif
 bool Maze::isRobotAttached = false;
 
 void Maze::initMaze()
@@ -114,8 +116,6 @@ void floodfill(Cell &c, int direction) {
 
 // Modified flood fill algorithm
 void floodfillHelper(Cell &c, int direction) {
-    Maze::robot->btSerial.printf("Entered floodfill helper\n");
-
     // add visited cell to path of robot
     if (Maze::reverseMode) {
         Maze::floodfillReversePath.push_back(&c);
@@ -191,20 +191,14 @@ void floodfillHelper(Cell &c, int direction) {
 
     //direction hasn't changed
     if(priorDirection == direction) {
-        // MMS::moveForward();
         moveForward();
     }
     else if(std::abs(priorDirection - direction) == 2) {
         //180 degree turn
-        // MMS::turnRight(); 
-        // MMS::turnRight();
-        // MMS::moveForward();
         turnRight(); 
         turnRight();
         moveForward();
     } else if((priorDirection + 1) % 4 == direction) {
-        // MMS::turnRight();
-        // MMS::moveForward();
         turnRight();
         moveForward();
     } 
@@ -221,9 +215,10 @@ void floodfillHelper(Cell &c, int direction) {
 }
 
 void updateWalls(Cell& cell, int direction) {
-    boolean isWallFront = false;
-    boolean isWallLeft = false;
-    boolean isWallRight = false;
+    #ifndef DONT_INCLUDE_LIBS
+    bool isWallFront = false;
+    bool isWallLeft = false;
+    bool isWallRight = false;
 
     // delay(200);
 
@@ -240,25 +235,23 @@ void updateWalls(Cell& cell, int direction) {
     }
 
     Maze::robot->correctRobot(isWallFront, isWallLeft, isWallRight);
-    // Update walls after correcting
+    #endif
 
+    // Update walls after correcting
     if(wallFront()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[direction]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[direction]);
-        isWallFront = true;
     }
 
     if(wallRight()) {
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[(direction + 1) % 4]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[(direction + 1) % 4]);
-        isWallRight = true;
     }
 
     if(wallLeft()) {
         int newDirection = mod(direction - 1, 4);
         Maze::get(cell.x, cell.y)->setWall(DIRECTIONS[newDirection]);
         MMS::setWall(cell.x, cell.y, DIRECTIONS[newDirection]);
-        isWallLeft = true;
     }
 
 
@@ -350,20 +343,35 @@ void Graph::addEdge(Cell* a, Cell* b) {
     edges.insert({a,b});
 };
 
-void Maze::attachRobot(Robot *r) {
-    Maze::robot = r;
-    Maze::isRobotAttached = true;
-}
-
-void Maze::dettachRobot() {
-    Maze::robot = NULL;
-    Maze::isRobotAttached = false;
-}
-
 bool Maze::getIsRobotAttached() {
     return Maze::isRobotAttached;
 }
 
+#ifdef DONT_INCLUDE_LIBS
+// Movement functions of robot
+void turnRight() {
+    MMS::turnRight();
+}
+
+void turnLeft() {
+    MMS::turnLeft();
+}
+
+void moveForward(int distance) {
+    MMS::moveForward(distance);
+}
+
+bool wallFront() {
+    return MMS::wallFront();
+}
+bool wallRight() {
+    return MMS::wallRight();
+}
+
+bool wallLeft() {
+    return MMS::wallLeft();
+}
+#else
 // Movement functions of robot
 void turnRight() {
     if (Maze::getIsRobotAttached()) {
@@ -414,3 +422,14 @@ bool wallLeft() {
         return MMS::wallLeft();
     }
 }
+
+void Maze::attachRobot(Robot *r) {
+    Maze::robot = r;
+    Maze::isRobotAttached = true;
+}
+
+void Maze::dettachRobot() {
+    Maze::robot = NULL;
+    Maze::isRobotAttached = false;
+}
+#endif

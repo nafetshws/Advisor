@@ -6,7 +6,9 @@
 #include <queue>
 #include <set>
 #include <map>
+#ifndef DONT_INCLUDE_LIBS 
 #include "./robot.hpp"
+#endif
 
 /**
  * Represents a cell using only 4 bytes.
@@ -66,14 +68,18 @@ struct Maze {
         static Cell *endCell; // cell where the previous run has ended
 
         // Robot
+        #ifndef DONT_INCLUDE_LIBS
         static Robot *robot;
+        #endif
         static bool isRobotAttached;
 
         static void initMaze();
         static void initMazeReverse();
         static Cell *get(uint8_t x, uint8_t y);
+        #ifndef DONT_INCLUDE_LIBS
         static void attachRobot(Robot *r);
         static void dettachRobot();
+        #endif
         static bool getIsRobotAttached();
 };
 

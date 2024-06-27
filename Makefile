@@ -18,13 +18,13 @@ all: clean #compiles everything
 	$(MAKE) test
 
 main: build_directory #only compiles the application
-	g++ -o $(OUT) src/algorithms/main.cpp $(FILES) $(CC_FLAGS) $(INC) -D DEBUG=$(DEBUG)
+	g++ -o $(OUT) src/algorithms/main.cpp $(FILES) $(CC_FLAGS) $(INC) -D DEBUG=$(DEBUG) -D DONT_INCLUDE_LIBS=1
 
 test: build_directory #only compiles the tests
-	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0
+	g++ -o $(TEST_OUT) $(FILES) $(TEST_FILES) $(CC_FLAGS) -D DEBUG=0 -D DONT_INCLUDE_LIBS=1
 
 wmain: build_directory_win
-	g++ -o build\main.exe src/algorithms/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG)
+	g++ -o build\main.exe src/algorithms/main.cpp $(FILES) $(CC_FLAGS) -D DEBUG=$(DEBUG) -D DONT_INCLUDE_LIBS=1
 
 build_directory_win:
 	@if not exist "build" mkdir build 

@@ -441,41 +441,13 @@ bool Robot::checkForStartSignal() {
 }
 
 bool Robot::wallFront() {
-  // this->btSerial.println("Front Wall");
-  // bool hasWall;
-  // bool hasChanged = false;
-  // while (!hasChanged) {
-  //   if (this->btSerial.available()) {
-  //     std::string s(btSerial.readStringUntil('\n').c_str());
-  //     hasWall = stoi(s);
-  //     hasChanged = true;
-  //   }
-  // }
-
   uint16_t averageDistance = calcAverageDistance(tofLeftFront, 3);
   bool hasWall = averageDistance < this->wallDistance;
-
-  // bool hasWall = tofLeftFront.getDist() < this->wallDistance && tofRightFront.getDist() < this->wallDistance;
-  // hasWall = tofRightFront.getDist() < this->wallDistance;
   this->btSerial.printf("front wall measured: %d - Distance: %d\n", hasWall, averageDistance);
-  // return hasWall;
-  // bool hasWall = irLeft.isTriggered() && irRight.isTriggered();
-  // this->btSerial.printf("Front wall measured: %d\n", hasWall);
   return hasWall;
 }
 
 bool Robot::wallRight() {
-  //  this->btSerial.println("Right Wall");
-  // bool hasWall;
-  // bool hasChanged = false;
-  // while (!hasChanged) {
-  //   if (this->btSerial.available()) {
-  //     std::string s(btSerial.readStringUntil('\n').c_str());
-  //     hasWall = stoi(s);
-  //     hasChanged = true;
-  //   }
-  // }
-
   uint16_t averageDistance = calcAverageDistance(tofRight, 3);
   bool hasWall = averageDistance < this->wallDistance;
   this->btSerial.printf("Right wall measured: %d - Distance: %d\n", hasWall, averageDistance);
@@ -483,17 +455,6 @@ bool Robot::wallRight() {
 }
 
 bool Robot::wallLeft() {
-// this->btSerial.println("Left Wall");
-// bool hasWall;
-// bool hasChanged = false;
-//   while (!hasChanged) {
-//     if (this->btSerial.available()) {
-//       std::string s(btSerial.readStringUntil('\n').c_str());
-//       hasWall = stoi(s);
-//       hasChanged = true;
-//     }
-//   }
-
   uint16_t averageDistance = calcAverageDistance(tofLeft, 3);
   bool hasWall = averageDistance < this->wallDistance;
   this->btSerial.printf("Left wall measured: %d - Distance: %d\n", hasWall, averageDistance);
@@ -538,15 +499,6 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   uint16_t speedDelta = this->driveSpeed / 5;
 
-  // Accelerate over a time frame of 100 ms to the desired speed
-  // for (int i = 0; i < 5; i++) {
-  //   motorLeft.turnForward(motorLeft.getSpeed()   + speedDelta);
-  //   motorRight.turnForward(motorRight.getSpeed() + speedDelta);
-  //   delay(20);
-  // }
-
-  // if (this->lastPDTerms[0] = 0) {
-
   motorLeft.turnForward(driveSpeed);
   motorRight.turnForward(driveSpeed);
   // }
@@ -557,29 +509,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   // Move forward until distance is covered, while correcting the steering error
   do {
-      // int diff = getEncLeft() - lastLeftEncoder;
-      // btSerial.printf("Diff: %d Enc diff: %d\n", millis() - startTime, diff);
-      // if (abs(diff) > 3) {
-      //   lastLeftEncoder = getEncLeft();
-      //   lastRightEncoder = getEncRight();
-      //   startTime = millis();
-      // } else if (millis() - startTime > 1000) {
-      //   btSerial.printf("Starting fail safe mode\n");
-      //   // Fail safe mode
-      //   unsigned long time = millis(); 
-
-      //   motorLeft.turnBackward(550);
-      //   motorRight.turnBackward(600);
-
-      //   delay(100);
-
-      //   motorLeft.stopMotor();
-      //   motorRight.stopMotor();
-
-      //   cellCorrectionWithToF(tofLeftFront, tofRightFront, tofRightFront);
-
-      // }
-
+      // Fail safe mode: Try to get off of wall
       if (millis() - startTime > 4000) {
         lastLeftEncoder = getEncLeft();
         lastRightEncoder = getEncRight();
@@ -609,11 +539,6 @@ void Robot::moveForwardUsingEncoders(int distance) {
 
   motorLeft.stopMotor();
   motorRight.stopMotor();
-
-  // resetLeftEncoder();
-  // resetRightEncoder();
-
-  // delay(700);
 }
 
 void Robot::calibrateToFOffsets() {
