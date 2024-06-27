@@ -3,6 +3,9 @@
 
 #include <cstdint>
 #include <vector>
+#include <queue>
+#include <set>
+#include <map>
 #include "./robot.hpp"
 
 /**
@@ -74,12 +77,34 @@ struct Maze {
         static bool getIsRobotAttached();
 };
 
+struct Graph 
+{
+    std::set<Cell*> vertices;
+    std::set<std::set<Cell*>> edges;
+    std::map<Cell*, std::set<Cell*>> graph;
+
+    std::map<Cell*, Cell*> par;
+    std::map<Cell*, int> dist;
+
+    void addVertex(Cell* c);
+    void addEdge(Cell* a, Cell* b);
+
+    void bfsInit();
+    void print(Cell* S, Cell* D);
+    void bfs(Cell* S);
+};
+
+extern Graph g;
+
 uint8_t calculateManhattanDistance(const Cell &cell1, const Cell &cell2);
 void floodfill(Cell &c, int direction = 0);
 void floodfillHelper(Cell &c, int direction);
 bool isOpenNeighbor(Cell &c, Cell &neighbor);
 void updateWalls(Cell &cell, int direction);
 int mod(int a, int b);
+void optimisePath();
+
+extern int direction_last;
 
 // Movement functions of robot
 void turnRight();

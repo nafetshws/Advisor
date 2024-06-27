@@ -9,6 +9,8 @@
 #include "../../include/robot.hpp"
 #undef FLOODFILL_INCLUDE
 
+#define VISITED_PATH_WEIGHT 1
+
 // static variables
 Cell Maze::maze[SIZE][SIZE];
 Cell *Maze::center1;
@@ -20,6 +22,7 @@ Cell *Maze::endCell;
 std::vector<Cell*> Maze::floodfillPath;
 std::vector<Cell*> Maze::floodfillReversePath;
 bool Maze::reverseMode;
+Graph g;
 int direction_last = 0;
 Robot *Maze::robot;
 bool Maze::isRobotAttached = false;
@@ -90,6 +93,13 @@ void Maze::initMazeReverse() {
             Maze::get(x, y)->distance = calculateManhattanDistance(*Maze::get(x, y), *center1);
         }
     }
+
+    for (auto cell : g.vertices)
+    {
+        cell->discovered = true;
+    }
+    Maze::get(0,0)->discovered = false; 
+
     // set start cell
     Maze::startCell = Maze::endCell;
 }
@@ -121,7 +131,6 @@ void floodfillHelper(Cell &c, int direction) {
 
     //update walls
     updateWalls(c, direction);
-    c.discovered = true;
 
     std::stack<Cell*> stack;
     stack.push(&c);
@@ -146,8 +155,8 @@ void floodfillHelper(Cell &c, int direction) {
             //std::cerr << "Neighbor cell: (" << unsigned(neighbor->x) << ", " << unsigned(neighbor->y) << ")" << std::endl;
             if(!isOpenNeighbor(*current, *neighbor)) continue;
 
-            if(neighbor->distance < minMD) {
-                minMD = neighbor->distance;
+            if(neighbor->distance + (neighbor->discovered ? VISITED_PATH_WEIGHT : 0) < minMD) {
+                minMD = neighbor->distance + (neighbor->discovered ? VISITED_PATH_WEIGHT : 0);
                 //update the next cell only if the neighbors of the current cell, which the robot is in, are searched
                 if(current->x == c.x && current->y == c.y) {
                     nextCell = neighbor;
@@ -200,11 +209,12 @@ void floodfillHelper(Cell &c, int direction) {
         moveForward();
     } 
     else {
-        // MMS::turnLeft();
-        // MMS::moveForward();
         turnLeft();
         moveForward();
-    } 
+    }
+
+    g.addVertex(&c);
+    g.addEdge(&c, nextCell); 
 
     // next cell location
     floodfillHelper(*nextCell, direction);
@@ -258,15 +268,19 @@ void Cell::setWall(char direction) {
     switch(direction) {
         case 'n':
             Maze::get(this->x, this->y)->setNorthWall();
+            if(this->y<SIZE-1) Maze::get(this->x, this->y+1)->setSoutWall();
             break;
         case 'e':
             Maze::get(this->x, this->y)->setEastWall();
+            if(this->x<SIZE-1) Maze::get(this->x+1, this->y)->setWestWall();
             break;
         case 's':
             Maze::get(this->x, this->y)->setSoutWall();
+            if(this->y>0) Maze::get(this->x, this->y-1)->setNorthWall();
             break;
         case 'w':
             Maze::get(this->x, this->y)->setWestWall();
+            if(this->x>0) Maze::get(this->x-1, this->y)->setEastWall();
             break;
         default:
             break;
@@ -327,6 +341,14 @@ int mod(int a, int b) {
     }
     return res;
 }
+
+void Graph::addVertex(Cell* c) {
+    vertices.insert(c);
+};
+
+void Graph::addEdge(Cell* a, Cell* b) {
+    edges.insert({a,b});
+};
 
 void Maze::attachRobot(Robot *r) {
     Maze::robot = r;
