@@ -81,3 +81,11 @@ void resetLeftEncoder() {
 void resetRightEncoder() {
     ENC_RIGHT_COUNT = 0;
 }
+
+void setLeftEncoder(uint32_t newValue) {
+    ENC_LEFT_COUNT = newValue;
+}
+
+void setRightEncoder(uint32_t newValue) {
+    ENC_RIGHT_COUNT = newValue;
+}

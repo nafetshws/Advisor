@@ -15,8 +15,8 @@ Robot::Robot() {
 
   this->turnTime = 270;
   // this->turnSpeed = 500;
-  this->turnSpeed = 420;
-  this->driveSpeed = 400;
+  this->turnSpeed = 450;
+  this->driveSpeed = 430;
   this->correctionSpeed = 550;
   this->wallDistance = 120;
   this->cellWidth = 160;
@@ -40,6 +40,11 @@ void Robot::setupRobot() {
   // start 
   btSerial.begin("BallE BluetoothTestInterface");
   Serial.println("\nSETUP: Serial Monitor running");
+
+
+  // 18 -> RX
+  // 19 -> TX
+  SerialMatrix.begin(9600, SERIAL_8N1, 19, 18);
 
   // SETUP SERVO MOTOR //////////////////////////
   setupServo(SERVO_PIN);
@@ -220,7 +225,7 @@ void Robot::turnRightWithGyro(float degrees) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 100; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
     delay(1);
@@ -250,7 +255,7 @@ void Robot::turnLeftWithGyro(float degrees) {
   motorLeft.stopMotor();
   motorRight.stopMotor();
 
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 100; i++) {
     readRawGyro();        // Get new Data
     calcGyro();           // Calculate new Angle
     delay(1);
@@ -546,8 +551,57 @@ void Robot::moveForwardUsingEncoders(int distance) {
   motorRight.turnForward(driveSpeed);
   // }
 
+  uint32_t lastLeftEncoder = startValueEncLeft;
+  uint32_t lastRightEncoder = startValueEncRight; 
+  unsigned long startTime = millis();
+
   // Move forward until distance is covered, while correcting the steering error
   do {
+      // int diff = getEncLeft() - lastLeftEncoder;
+      // btSerial.printf("Diff: %d Enc diff: %d\n", millis() - startTime, diff);
+      // if (abs(diff) > 3) {
+      //   lastLeftEncoder = getEncLeft();
+      //   lastRightEncoder = getEncRight();
+      //   startTime = millis();
+      // } else if (millis() - startTime > 1000) {
+      //   btSerial.printf("Starting fail safe mode\n");
+      //   // Fail safe mode
+      //   unsigned long time = millis(); 
+
+      //   motorLeft.turnBackward(550);
+      //   motorRight.turnBackward(600);
+
+      //   delay(100);
+
+      //   motorLeft.stopMotor();
+      //   motorRight.stopMotor();
+
+      //   cellCorrectionWithToF(tofLeftFront, tofRightFront, tofRightFront);
+
+      // }
+
+      if (millis() - startTime > 4000) {
+        lastLeftEncoder = getEncLeft();
+        lastRightEncoder = getEncRight();
+        uint32_t middle = (lastLeftEncoder + lastRightEncoder) / 2;
+
+        motorLeft.turnBackward(driveSpeed + 150);
+        motorRight.turnBackward(driveSpeed + 150);
+
+        delay(100);
+
+        motorLeft.stopMotor();
+        motorRight.stopMotor();
+
+        cellCorrectionWithToF(tofLeft, tofRight, tofRight);
+        setLeftEncoder(middle - 50); 
+        setRightEncoder(middle - 50); 
+        startTime = millis();
+
+        motorLeft.turnForward(driveSpeed);
+        motorRight.turnForward(driveSpeed);
+      }
+
       this->correctSteeringError();
       delay(5);
   } while (getEncLeft()  - startValueEncLeft  < motorRotationsNeeded && 
@@ -559,7 +613,13 @@ void Robot::moveForwardUsingEncoders(int distance) {
   // resetLeftEncoder();
   // resetRightEncoder();
 
-  delay(700);
+  // delay(700);
+}
+
+void Robot::calibrateToFOffsets() {
+  int16_t diff = calcAverageDifference(tofLeftFront, tofRightFront, 60);
+  TOF_6180::TOF_LEFT_FRONT_OFFSET = diff;
+  btSerial.printf("Offset after calibrating: %d\n", diff);
 }
 
 void Robot::alignRobot(TOF_6180 &tof1, TOF_6180 &tof2) {
@@ -656,11 +716,12 @@ uint16_t Robot::calcAverageDistance(TOF_6180 &tof, int samples) {
 
 void Robot::correctFrontDistance() {
   uint16_t distance = calcAverageDistance(tofLeftFront, 3);
+  int optimalDistance = 55 + TOF_6180::TOF_LEFT_FRONT_OFFSET;
 
-  while (distance > 67 || distance < 63) {
+  while (distance > optimalDistance + 2 || distance < optimalDistance - 2) {
     unsigned long startTime = micros();
 
-    if (distance < 65) {
+    if (distance < optimalDistance) {
       // Drive back
       motorLeft.turnBackward(correctionSpeed);
       motorRight.turnBackward(correctionSpeed);
@@ -677,7 +738,7 @@ void Robot::correctFrontDistance() {
     motorLeft.stopMotor();
     motorRight.stopMotor();
 
-    distance = calcAverageDistance(tofLeftFront, 2);
+    distance = calcAverageDistance(tofLeftFront, 4);
   }
 
 }
@@ -724,23 +785,23 @@ void Robot::cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2) {
 void Robot::correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight) {
   if (isWallFront && isWallLeft && isWallRight) {
     this->correctWithFrontWall();
-    delay(300);
+    delay(200);
     this->correctFrontDistance();
-    delay(300);
+    delay(200);
     this->correctWithFrontWall();
-    delay(300);
+    delay(200);
     this->cellCorrectionWithToF(tofLeft, tofRight, tofRight);
-    delay(300);
+    delay(200);
   } else if (isWallFront) {
     this->correctWithFrontWall();
-    delay(300);
+    delay(200);
     this->correctFrontDistance();
-    delay(300);
+    delay(200);
     this->correctWithFrontWall();
-    delay(300);
+    delay(200);
   } else if ((isWallLeft || isWallRight) && counterSinceLastCorrection > 3) {
     this->cellCorrectionWithToF(tofLeft, tofRight, tofRight);
-    delay(300);
+    delay(200);
   } else {
     counterSinceLastCorrection++;
     return;
@@ -801,7 +862,7 @@ void Robot::correctWithFrontWall() {
           motorLeft.stopMotor();
           motorRight.stopMotor();
 
-          difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 2);
+          difference = this->calcAverageDifference(tofLeftFront, tofRightFront, 4);
         }
 
         return;
@@ -869,7 +930,7 @@ void Robot::smallAdjustmentGyro(float degrees, bool turnLeft) {
   readRawGyro();
   calcGyro();
 
-  while (abs(getYawAngle()) < degrees - 0.8) {
+  while (abs(getYawAngle()) < degrees - 1) {
     unsigned long startTime = micros();
 
     if (turnLeft) {
@@ -880,7 +941,7 @@ void Robot::smallAdjustmentGyro(float degrees, bool turnLeft) {
       motorLeft.turnForward(correctionSpeed);
     }
 
-    while (micros() - startTime < 30 * 1e3) {
+    while (micros() - startTime < 20 * 1e3) {
       readRawGyro();
       calcGyro();
     }
@@ -919,7 +980,7 @@ void Robot::correctSteeringError() {
   uint16_t rightMotorSpeedPid = this->motorRight.getSpeed() + (int) pidTerm;
 
   // Debug info
-  btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
+  // btSerial.printf("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
   // Serial.printf  ("e: %d  EncL: %d  EncR: %d  proportional: %f  derivative: %f  PidTerm: %f\n", error, getEncLeft(), getEncRight(), proportional, derivative, pidTerm);
 
   // Prevent PD from going too fast
@@ -964,10 +1025,10 @@ void Robot::ballPickUp() {
   moveForwardUsingEncoders(1);
   delay(delayTime);
   turnRight(90);
-  delay(delayTime);
+  delay(delayTime + 100);
   moveForwardUsingEncoders(1);
   delay(delayTime);
-  turnLeft(45);
+  turnLeft(41);
   delay(delayTime);
 
   // Insert logic for servo //////
@@ -979,7 +1040,7 @@ void Robot::ballPickUp() {
   motorLeft.turnForward(driveSpeed);
   motorRight.turnForward(driveSpeed);
 
-  while (millis() - startTime < 330) {
+  while (millis() - startTime < 400) {
     
   }
 
@@ -1033,4 +1094,8 @@ void Robot::ballPickUp() {
   delay(300);
   turnRight();
 
+}
+
+void Robot::sendHeadChar(char i) {
+  SerialMatrix.println(i);
 }

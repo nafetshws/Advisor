@@ -10,10 +10,10 @@
 #define TOF_START_ADDR 0x40
 
 // Error Offsets
-#define TOF_LEFT_FRONT_OFFSET 0 
-#define TOF_RIGHT_FRONT_OFFSET 0 
-#define TOF_LEFT_OFFSET 0 
-#define TOF_RIGHT_OFFSET 0 
+// #define TOF_LEFT_FRONT_OFFSET 0 
+// #define TOF_RIGHT_FRONT_OFFSET 3 
+// #define TOF_LEFT_OFFSET 0 
+// #define TOF_RIGHT_OFFSET 0 
 
 class TOF {
 
@@ -29,6 +29,7 @@ class TOF {
     Adafruit_VL53L0X sensor_obj = Adafruit_VL53L0X();
     // Mesure object to store the measurment
     VL53L0X_RangingMeasurementData_t measure;
+
 
 public:
 
@@ -87,6 +88,10 @@ class TOF_6180 {
     Adafruit_VL6180X sensor_obj = Adafruit_VL6180X();
 
 public:
+    static int16_t TOF_LEFT_FRONT_OFFSET; 
+    static int16_t TOF_RIGHT_FRONT_OFFSET;
+    static int16_t TOF_LEFT_OFFSET; 
+    static int16_t TOF_RIGHT_OFFSET; 
 
     /**
      * @brief   Create a new tof sensor object for measuring distance

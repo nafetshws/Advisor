@@ -9,6 +9,7 @@
 #include "imu.hpp"
 
 #include <BluetoothSerial.h>
+#include <HardwareSerial.h>
 
 // ESP32 PIN OUT ////////////////////////////////
 
@@ -83,6 +84,8 @@ class Robot {
         // Bluetooth Serial
         BluetoothSerial btSerial;
 
+        HardwareSerial SerialMatrix;
+
         // dt
         unsigned long prevTime;
 
@@ -125,6 +128,7 @@ class Robot {
         void correctWithFrontWall(); 
         void cellCorrectionWithToF(TOF_6180 &l1, TOF_6180 &r1, TOF_6180 &r2); 
         void correctFrontDistance();
+        void calibrateToFOffsets();
 
         void correctRobot(boolean isWallFront, boolean isWallLeft, boolean isWallRight);
 
@@ -142,6 +146,8 @@ class Robot {
         void turnLeftWithEncoders();
         void turnRightSimple(bool disableTurnErrorCorrection = false);
         void turnLeftSimple(bool disableTurnErrorCorrection = false);
+        
+        void sendHeadChar(char i);
         //////////////////////////////////////////
 };
 

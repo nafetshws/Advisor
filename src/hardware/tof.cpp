@@ -1,8 +1,8 @@
 #include "../../include/tof.hpp"
 
 
-// TOF VL53L0X //////////////////////////////////
 
+// TOF VL53L0X //////////////////////////////////
 TOF::TOF() {}
 
 
@@ -49,29 +49,33 @@ uint16_t TOF::getDist(bool useStoredDist) {
   distance = measure.RangeMilliMeter;
 
   // Subract physical error of tof sensor
-  switch (this->id) {
-    case 1:
-      distance -= TOF_LEFT_FRONT_OFFSET;
-      break;
-    case 2:
-      distance -= TOF_RIGHT_FRONT_OFFSET;
-      break;
-    case 3:
-      distance -= TOF_LEFT_OFFSET;
-      break;
-    case 4:
-      distance -= TOF_RIGHT_OFFSET;
-      break;
-    default:
-      Serial.printf("Error!\n");
-      break;
-  }
+  // switch (this->id) {
+  //   case 1:
+  //     distance -= TOF_LEFT_FRONT_OFFSET;
+  //     break;
+  //   case 2:
+  //     distance -= TOF_RIGHT_FRONT_OFFSET;
+  //     break;
+  //   case 3:
+  //     distance -= TOF_LEFT_OFFSET;
+  //     break;
+  //   case 4:
+  //     distance -= TOF_RIGHT_OFFSET;
+  //     break;
+  //   default:
+  //     Serial.printf("Error!\n");
+  //     break;
+  // }
 
   return distance;
 }
 
 
 // TOF VL6180X //////////////////////////////////
+int16_t TOF_6180::TOF_LEFT_FRONT_OFFSET = 0;
+int16_t TOF_6180::TOF_RIGHT_FRONT_OFFSET = 0;
+int16_t TOF_6180::TOF_LEFT_OFFSET = 0;
+int16_t TOF_6180::TOF_RIGHT_OFFSET = 0;
 
 TOF_6180::TOF_6180() {}
 
