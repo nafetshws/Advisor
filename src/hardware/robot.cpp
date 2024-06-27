@@ -15,8 +15,8 @@ Robot::Robot() {
 
   this->turnTime = 270;
   // this->turnSpeed = 500;
-  this->turnSpeed = 420;
-  this->driveSpeed = 400;
+  this->turnSpeed = 450;
+  this->driveSpeed = 430;
   this->correctionSpeed = 550;
   this->wallDistance = 120;
   this->cellWidth = 160;
@@ -40,6 +40,11 @@ void Robot::setupRobot() {
   // start 
   btSerial.begin("BallE BluetoothTestInterface");
   Serial.println("\nSETUP: Serial Monitor running");
+
+
+  // 18 -> RX
+  // 19 -> TX
+  SerialMatrix.begin(9600, SERIAL_8N1, 19, 18);
 
   // SETUP SERVO MOTOR //////////////////////////
   setupServo(SERVO_PIN);
@@ -527,7 +532,7 @@ void Robot::moveForwardUsingEncoders(int distance) {
   uint32_t startValueEncLeft = getEncLeft();
   uint32_t startValueEncRight = getEncRight();
 
-  float wheelRotationsNeeded = (distance * 16.8) / WHEEL_CIRCUMFERENCE;
+  float wheelRotationsNeeded = (distance * 16.6) / WHEEL_CIRCUMFERENCE;
   // Encoder increments 3 times per motor revolution * 30 (Gear ratio) = 90
   float motorRotationsNeeded = wheelRotationsNeeded * 90;
 
@@ -711,7 +716,7 @@ uint16_t Robot::calcAverageDistance(TOF_6180 &tof, int samples) {
 
 void Robot::correctFrontDistance() {
   uint16_t distance = calcAverageDistance(tofLeftFront, 3);
-  int optimalDistance = 60 + TOF_6180::TOF_LEFT_FRONT_OFFSET;
+  int optimalDistance = 55 + TOF_6180::TOF_LEFT_FRONT_OFFSET;
 
   while (distance > optimalDistance + 2 || distance < optimalDistance - 2) {
     unsigned long startTime = micros();
@@ -1001,7 +1006,7 @@ void Robot::startFloodfill() {
 }
 
 void Robot::ballPickUp() {
-  uint16_t delayTime = 250;
+  uint16_t delayTime = 350;
   // Align robot
   correctWithFrontWall();
   delay(delayTime);
@@ -1020,7 +1025,7 @@ void Robot::ballPickUp() {
   moveForwardUsingEncoders(1);
   delay(delayTime);
   turnRight(90);
-  delay(delayTime);
+  delay(delayTime + 100);
   moveForwardUsingEncoders(1);
   delay(delayTime);
   turnLeft(41);
@@ -1035,7 +1040,7 @@ void Robot::ballPickUp() {
   motorLeft.turnForward(driveSpeed);
   motorRight.turnForward(driveSpeed);
 
-  while (millis() - startTime < 450) {
+  while (millis() - startTime < 400) {
     
   }
 
@@ -1089,4 +1094,8 @@ void Robot::ballPickUp() {
   delay(300);
   turnRight();
 
+}
+
+void Robot::sendHeadChar(char i) {
+  SerialMatrix.println(i);
 }
